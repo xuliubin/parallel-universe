@@ -431,6 +431,54 @@
     text-align: center;
   }
 
+  .privacy-toggles {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+  .privacy-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    user-select: none;
+  }
+  .privacy-check { display: none; }
+  .privacy-switch {
+    width: 40px;
+    height: 22px;
+    border-radius: 11px;
+    background: rgba(120,140,220,0.2);
+    border: 1px solid var(--border-glow);
+    position: relative;
+    transition: all 0.3s ease;
+    flex-shrink: 0;
+  }
+  .privacy-switch::after {
+    content: '';
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: var(--text-muted);
+    transition: all 0.3s ease;
+  }
+  .privacy-check:checked + .privacy-switch {
+    background: rgba(196,122,138,0.3);
+    border-color: var(--accent-rose);
+  }
+  .privacy-check:checked + .privacy-switch::after {
+    left: 20px;
+    background: var(--accent-rose);
+  }
+  .privacy-label {
+    font-size: 13px;
+    color: var(--text-secondary);
+    letter-spacing: 0.5px;
+  }
+
   /* ── SCREEN 4: Loading ── */
   #screen-loading {
     gap: 0;
@@ -894,6 +942,27 @@
         </div>
       </div>
 
+      <div class="input-group" style="margin-top:20px">
+        <label class="input-label">🔒 隐私打码（截图分享时隐藏）</label>
+        <div class="privacy-toggles">
+          <label class="privacy-item">
+            <input type="checkbox" class="privacy-check" data-key="name">
+            <span class="privacy-switch"></span>
+            <span class="privacy-label">姓名打码</span>
+          </label>
+          <label class="privacy-item">
+            <input type="checkbox" class="privacy-check" data-key="age">
+            <span class="privacy-switch"></span>
+            <span class="privacy-label">年龄打码</span>
+          </label>
+          <label class="privacy-item">
+            <input type="checkbox" class="privacy-check" data-key="gender">
+            <span class="privacy-switch"></span>
+            <span class="privacy-label">性别打码</span>
+          </label>
+        </div>
+      </div>
+
       <button class="btn-primary" style="margin-top:28px;width:100%" id="btnSimulate" onclick="startSimulation()">
         🚀 开始推演
       </button>
@@ -1172,8 +1241,13 @@ function startSimulation() {
     showToast('请至少选择一个分叉点');
     return;
   }
+  // Read privacy settings
+  const privacy = {};
+  document.querySelectorAll('.privacy-check').forEach(cb => {
+    privacy[cb.dataset.key] = cb.checked;
+  });
   goToScreen('screen-loading');
-  runLoadingSequence(name, parseInt(ageSlider.value), userGender);
+  runLoadingSequence(name, parseInt(ageSlider.value), userGender, privacy);
 }
 
 // ═══════════════ SCREEN 4: LOADING ═══════════════
@@ -1319,7 +1393,7 @@ function addTerminalLine(text, className, withPrompt) {
 }
 
 // ═══ Loading orchestration ═══
-function runLoadingSequence(name, age, gender) {
+function runLoadingSequence(name, age, gender, privacy) {
   const archiveNum = Math.floor(10000 + Math.random() * 90000);
   const forkCount = selectedForkIds.length;
   const foundCount = Math.floor(Math.random() * 7) + 8;
@@ -1376,7 +1450,7 @@ function runLoadingSequence(name, age, gender) {
                 wormActive = false;
                 wormCtx.clearRect(0, 0, wormCanvas.width, wormCanvas.height);
                 // Show result
-                generateResult(name, age, gender, archiveNum);
+                generateResult(name, age, gender, archiveNum, privacy);
               }, 350);
             }, 500);
           }
@@ -1807,7 +1881,7 @@ function resolveFork(forkId, age) {
   return { job, company, salary, edu, butterflies, city, forkQuestion };
 }
 
-function generateResult(name, age, gender, archiveNum) {
+function generateResult(name, age, gender, archiveNum, privacy) {
   const forkIds = selectedForkIds;
   const forkCount = forkIds.length;
 
@@ -1851,13 +1925,18 @@ function generateResult(name, age, gender, archiveNum) {
     allButterflies = allButterflies.map(b => b.replace('他/', '她/'));
   }
 
+  // Apply privacy masking
+  const displayName = privacy?.name ? name[0] + '**' : name;
+  const displayGender = privacy?.gender ? '**' : (gender === 'female' ? '女' : '男');
+  const displayAge = privacy?.age ? '**岁' : `${age}岁`;
+
   // Update DOM
   document.getElementById('archiveId').textContent = `平行宇宙档案 #${archiveNum}`;
   document.getElementById('avatarIcon').textContent = gender === 'female' ? '🌙' : '🌟';
   document.getElementById('basicInfo').innerHTML = `
-    <span class="info-chip">${name}</span>
-    <span class="info-chip">${gender === 'female' ? '女' : '男'}</span>
-    <span class="info-chip">${age}岁</span>
+    <span class="info-chip">${displayName}</span>
+    <span class="info-chip">${displayGender}</span>
+    <span class="info-chip">${displayAge}</span>
     <span class="info-chip">${city}</span>
   `;
   document.getElementById('jobTitle').textContent = job;
