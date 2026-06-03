@@ -728,6 +728,35 @@
   .butterfly-list li:nth-child(3) { border-left-color: var(--accent-gold); }
   .butterfly-list li:nth-child(4) { border-left-color: var(--accent-lavender); }
 
+  .tagline-box {
+    width: 100%;
+    text-align: center;
+    margin-top: 16px;
+    padding: 14px 16px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, rgba(232,180,75,0.08), rgba(212,165,116,0.04));
+    border: 1px solid rgba(212,165,116,0.25);
+    position: relative;
+  }
+  .tagline-box::before {
+    content: '✦';
+    position: absolute;
+    top: -10px;
+    left: 50%;
+    transform: translateX(-50%);
+    color: var(--accent-amber);
+    font-size: 14px;
+    background: var(--bg-deep);
+    padding: 0 8px;
+  }
+  .tagline-text {
+    font-size: 14px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    color: var(--accent-amber);
+    line-height: 1.7;
+  }
+
   .fork-highlight {
     display: inline-block;
     margin-top: 12px;
@@ -998,6 +1027,10 @@
       <div class="info-section">
         <div class="info-section-title">📖 蝴蝶效应</div>
         <ul class="butterfly-list" id="butterflyList"></ul>
+      </div>
+
+      <div class="tagline-box" id="taglineBox">
+        <span class="tagline-text" id="taglineText"></span>
       </div>
 
       <div style="display:flex;justify-content:center">
@@ -1881,6 +1914,115 @@ function resolveFork(forkId, age) {
   return { job, company, salary, edu, butterflies, city, forkQuestion };
 }
 
+// ═══ Tagline generation ═══
+function generateTagline(forkIds, results, confidence) {
+  const primary = results.find(r => r.job !== '—') || results[0];
+  const job = primary.job;
+  const city = primary.city;
+  const forkCount = forkIds.length;
+
+  // Extract vibe from forks
+  const hasCareer = forkIds.some(id => id.startsWith('c'));
+  const hasLove = forkIds.some(id => id.startsWith('l'));
+  const hasCity = forkIds.some(id => id.startsWith('t'));
+  const hasEdu = forkIds.some(id => id.startsWith('e'));
+  const hasDrama = forkIds.some(id => id.startsWith('d'));
+
+  // Build tagline pools based on dominant theme
+  const isHighConfidence = confidence > 20;
+  const isMultiFork = forkCount > 1;
+
+  const taglines = [];
+
+  // Career ambition
+  if (hasCareer && !hasLove && job.includes('总监') || job.includes('经理') || job.includes('创始人')) {
+    taglines.push(
+      '你在另一条时间线里，野心比现在大得多。',
+      '那条路上的你，把加班变成了勋章。',
+      '另一个你，正在会议室里改写命运。',
+    );
+  }
+
+  // Love focus
+  if (hasLove) {
+    taglines.push(
+      '爱情里的岔路，每一步都算数。',
+      '有些人留在另一条时间线里，才是最好的结局。',
+      '你在 B 面学会了放手，也学会了珍惜。',
+      '爱的反面不是恨，是"如果当年"。',
+    );
+  }
+
+  // Escape / slow life
+  if (hasCity && (city === '大理' || city === '成都' || city === '厦门' || city === '丽江' || city === '北海')) {
+    taglines.push(
+      `在${city}的另一个你，终于学会了慢下来。`,
+      '逃离不是逃避，是换一种方式认真生活。',
+      '你梦想的生活，平行宇宙里的你已经替你试过了。',
+    );
+  }
+
+  // Abroad
+  if (city === '旧金山' || city === '伦敦' || city === '新加坡' || city === '东京' || city === '悉尼' || city === '纽约' || city === '香港') {
+    taglines.push(
+      `地球另一端的你，活成了别人眼中的"远方"。`,
+      '走得越远，越知道什么放不下。',
+    );
+  }
+
+  // Education / passion major
+  if (hasEdu) {
+    taglines.push(
+      '那条少有人走的路，其实风景更好。',
+      '热爱是最好的导航，只是有时候路比较绕。',
+    );
+  }
+
+  // High drama / lottery ticket
+  if (hasDrama) {
+    taglines.push(
+      '命运有时候就是一念之差。',
+      '有些事概率再低，也值得赌一次。',
+      '那个更勇敢的版本，已经在另一头等你了。',
+    );
+  }
+
+  // Multi-fork chaos
+  if (isMultiFork && confidence < 15) {
+    taglines.push(
+      '你改的变量太多，平行宇宙自己都乱了。',
+      `${forkCount} 个选择一起改，连命运都算不过来了。`,
+    );
+  }
+
+  // Low confidence - uncertain
+  if (confidence < 12) {
+    taglines.push(
+      '这条线很不稳定，但也许最精彩的剧本都是即兴的。',
+      '概率越低的人生，越值得一过。',
+    );
+  }
+
+  // High confidence - settled
+  if (isHighConfidence && !isMultiFork) {
+    taglines.push(
+      '这条人生线的确定性很高——高到让人有点害怕。',
+      '命运给的确定性，有时候比不确定性更让人不安。',
+    );
+  }
+
+  // Generic fallbacks
+  taglines.push(
+    '另一个你，正在过着你不敢过的生活。',
+    '平行宇宙不会告诉你哪个选择更好，但它让你看见：你本来可以成为谁。',
+    '人生没有如果，但想象一下也不算犯规。',
+    '每一条没选的路，都长成了另一个你。',
+    `这是你第 ${Math.floor(Math.random() * 90000) + 10000} 个可能的自己。`,
+  );
+
+  return pick(taglines);
+}
+
 function generateResult(name, age, gender, archiveNum, privacy) {
   const forkIds = selectedForkIds;
   const forkCount = forkIds.length;
@@ -1947,6 +2089,9 @@ function generateResult(name, age, gender, archiveNum, privacy) {
     `<li>${b}</li>`
   ).join('');
 
+  // Generate tagline
+  const tagline = generateTagline(forkIds, results, confidence);
+  document.getElementById('taglineText').textContent = tagline;
   document.getElementById('forkHighlight').textContent = forkHighlight;
   document.getElementById('confidencePercent').textContent = `${confidence}%`;
 
