@@ -1,0 +1,1656 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>平行宇宙简历 | B面人生模拟</title>
+<style>
+  :root {
+    --bg-deep: #060b1a;
+    --bg-card: rgba(14, 18, 40, 0.75);
+    --bg-card-hover: rgba(20, 25, 55, 0.85);
+    --border-glow: rgba(120, 140, 220, 0.3);
+    --accent-gold: #d4a574;
+    --accent-rose: #c47a8a;
+    --accent-cyan: #6abfc7;
+    --accent-lavender: #9a8fd4;
+    --accent-amber: #e8b44b;
+    --text-primary: #e8e6f0;
+    --text-secondary: #9a97b0;
+    --text-muted: #6b6880;
+    --radius: 16px;
+    --radius-sm: 10px;
+  }
+
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+
+  html, body {
+    width: 100%;
+    min-height: 100vh;
+    min-height: 100dvh;
+    background: var(--bg-deep);
+    font-family: "PingFang SC", "Microsoft YaHei", "Noto Sans SC", -apple-system, sans-serif;
+    color: var(--text-primary);
+    overflow-x: hidden;
+    -webkit-tap-highlight-color: transparent;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ── Starfield Canvas ── */
+  #starfield {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+  }
+
+  /* ── Main Container ── */
+  .app-container {
+    position: relative;
+    z-index: 1;
+    max-width: 440px;
+    margin: 0 auto;
+    padding: 20px 16px 40px;
+    min-height: 100vh;
+    min-height: 100dvh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* ── Screen Management ── */
+  .screen {
+    display: none;
+    width: 100%;
+    flex-direction: column;
+    align-items: center;
+    animation: screenIn 0.5s cubic-bezier(0.22, 0.61, 0.36, 1);
+  }
+  .screen.active {
+    display: flex;
+  }
+
+  @keyframes screenIn {
+    from { opacity: 0; transform: translateY(24px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(16px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes pulseGlow {
+    0%, 100% { box-shadow: 0 0 20px rgba(120,140,220,0.2), 0 0 60px rgba(120,140,220,0.05); }
+    50%      { box-shadow: 0 0 30px rgba(120,140,220,0.35), 0 0 80px rgba(120,140,220,0.1); }
+  }
+
+  @keyframes spinSlow {
+    from { transform: rotate(0deg); }
+    to   { transform: rotate(360deg); }
+  }
+
+  @keyframes twinkle {
+    0%, 100% { opacity: 0.2; }
+    50%      { opacity: 0.8; }
+  }
+
+  /* ── Glass Card ── */
+  .glass-card {
+    background: var(--bg-card);
+    backdrop-filter: blur(20px) saturate(140%);
+    -webkit-backdrop-filter: blur(20px) saturate(140%);
+    border: 1px solid var(--border-glow);
+    border-radius: var(--radius);
+    padding: 28px 22px;
+    width: 100%;
+    transition: all 0.35s ease;
+  }
+
+  .glass-card:hover {
+    background: var(--bg-card-hover);
+    border-color: rgba(120,140,220,0.5);
+  }
+
+  /* ── Buttons ── */
+  .btn-primary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 14px 36px;
+    border: none;
+    border-radius: 50px;
+    font-size: 16px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    cursor: pointer;
+    color: #0a0e1a;
+    background: linear-gradient(135deg, var(--accent-amber), #c9943a);
+    box-shadow: 0 4px 24px rgba(232,180,75,0.25);
+    transition: all 0.3s ease;
+    font-family: inherit;
+    position: relative;
+    overflow: hidden;
+  }
+  .btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 32px rgba(232,180,75,0.4);
+  }
+  .btn-primary:active {
+    transform: translateY(0);
+  }
+  .btn-primary:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+  }
+
+  .btn-ghost {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 12px 28px;
+    border: 1px solid var(--border-glow);
+    border-radius: 50px;
+    background: transparent;
+    color: var(--text-primary);
+    font-size: 15px;
+    cursor: pointer;
+    font-family: inherit;
+    transition: all 0.3s ease;
+  }
+  .btn-ghost:hover {
+    background: rgba(120,140,220,0.1);
+    border-color: rgba(120,140,220,0.6);
+  }
+
+  /* ── SCREEN 1: Landing ── */
+  #screen-landing {
+    text-align: center;
+    gap: 8px;
+  }
+  .landing-icon {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 35% 35%, rgba(180,160,220,0.4), transparent 70%),
+                radial-gradient(circle at 65% 60%, rgba(120,180,220,0.3), transparent 60%),
+                linear-gradient(135deg, #1a1e3a, #0d1228);
+    border: 1.5px solid rgba(140,160,220,0.4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 20px;
+    animation: pulseGlow 4s ease-in-out infinite;
+    position: relative;
+  }
+  .landing-icon::after {
+    content: '🌌';
+    font-size: 36px;
+    line-height: 1;
+  }
+  .landing-title {
+    font-size: 28px;
+    font-weight: 700;
+    line-height: 1.35;
+    letter-spacing: 1px;
+    background: linear-gradient(180deg, #f0e8ff 0%, #b8a8d8 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 8px;
+  }
+  .landing-subtitle {
+    font-size: 15px;
+    color: var(--text-secondary);
+    letter-spacing: 0.5px;
+    margin-bottom: 32px;
+  }
+  .landing-disclaimer {
+    position: fixed;
+    bottom: 24px;
+    left: 0;
+    right: 0;
+    text-align: center;
+    font-size: 11px;
+    color: var(--text-muted);
+    z-index: 2;
+  }
+
+  /* ── SCREEN 2: Fork Selection ── */
+  #screen-select {
+    gap: 16px;
+    justify-content: flex-start;
+    padding-top: 10px;
+  }
+  .section-label {
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 3px;
+    color: var(--accent-gold);
+    text-align: center;
+    margin-bottom: 4px;
+  }
+  .tab-bar {
+    display: flex;
+    gap: 0;
+    width: 100%;
+    background: rgba(20,25,55,0.5);
+    border-radius: 50px;
+    padding: 4px;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+  .tab-bar::-webkit-scrollbar { display: none; }
+  .tab-btn {
+    flex: 1 0 auto;
+    padding: 10px 16px;
+    border: none;
+    border-radius: 50px;
+    background: transparent;
+    color: var(--text-secondary);
+    font-size: 13px;
+    cursor: pointer;
+    font-family: inherit;
+    white-space: nowrap;
+    transition: all 0.3s ease;
+    letter-spacing: 0.5px;
+  }
+  .tab-btn.active {
+    background: rgba(120,140,220,0.25);
+    color: #fff;
+    font-weight: 600;
+  }
+
+  .fork-list {
+    display: none;
+    flex-direction: column;
+    gap: 12px;
+    width: 100%;
+    max-height: 50vh;
+    overflow-y: auto;
+    padding: 2px;
+    scrollbar-width: thin;
+  }
+  .fork-list.active { display: flex; }
+
+  .fork-option {
+    background: var(--bg-card);
+    border: 1.5px solid transparent;
+    border-radius: var(--radius-sm);
+    padding: 16px 18px;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    position: relative;
+  }
+  .fork-option:hover {
+    background: var(--bg-card-hover);
+  }
+  .fork-option.selected {
+    border-color: var(--accent-gold);
+    background: rgba(212,165,116,0.08);
+    box-shadow: 0 0 20px rgba(212,165,116,0.15);
+  }
+  .fork-option.selected::after {
+    content: '✦';
+    position: absolute;
+    right: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--accent-gold);
+    font-size: 14px;
+  }
+  .fork-option .fork-question {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 4px;
+  }
+  .fork-option .fork-hint {
+    font-size: 12px;
+    color: var(--text-muted);
+  }
+
+  .sticky-bottom {
+    position: sticky;
+    bottom: 20px;
+    width: 100%;
+    padding-top: 12px;
+    background: linear-gradient(transparent, var(--bg-deep) 40%);
+    display: flex;
+    justify-content: center;
+  }
+
+  /* ── SCREEN 3: Info Input ── */
+  #screen-input {
+    gap: 24px;
+  }
+  .input-group {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .input-label {
+    font-size: 13px;
+    letter-spacing: 2px;
+    color: var(--accent-lavender);
+    text-transform: uppercase;
+  }
+  .text-input {
+    width: 100%;
+    padding: 14px 18px;
+    border-radius: 50px;
+    border: 1.5px solid var(--border-glow);
+    background: rgba(14,18,40,0.6);
+    color: var(--text-primary);
+    font-size: 16px;
+    font-family: inherit;
+    outline: none;
+    transition: all 0.3s ease;
+  }
+  .text-input:focus {
+    border-color: var(--accent-cyan);
+    box-shadow: 0 0 20px rgba(106,191,199,0.15);
+  }
+  .text-input::placeholder {
+    color: var(--text-muted);
+  }
+
+  .gender-toggle {
+    display: flex;
+    gap: 12px;
+    width: 100%;
+  }
+  .gender-btn {
+    flex: 1;
+    padding: 12px;
+    border-radius: 50px;
+    border: 1.5px solid var(--border-glow);
+    background: rgba(14,18,40,0.6);
+    color: var(--text-secondary);
+    font-size: 15px;
+    cursor: pointer;
+    font-family: inherit;
+    text-align: center;
+    transition: all 0.3s ease;
+  }
+  .gender-btn.selected {
+    border-color: var(--accent-rose);
+    background: rgba(196,122,138,0.12);
+    color: #fff;
+    font-weight: 600;
+  }
+
+  .age-slider-wrap {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+  .age-slider {
+    flex: 1;
+    -webkit-appearance: none;
+    appearance: none;
+    height: 6px;
+    border-radius: 3px;
+    background: rgba(120,140,220,0.25);
+    outline: none;
+  }
+  .age-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--accent-lavender), #7b6fc4);
+    cursor: pointer;
+    border: 3px solid #fff;
+    box-shadow: 0 2px 12px rgba(154,143,212,0.4);
+  }
+  .age-value {
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--accent-lavender);
+    min-width: 36px;
+    text-align: center;
+  }
+
+  /* ── SCREEN 4: Loading ── */
+  #screen-loading {
+    gap: 32px;
+  }
+  .loading-ring {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    border: 2px solid transparent;
+    border-top-color: var(--accent-lavender);
+    border-right-color: var(--accent-cyan);
+    animation: spinSlow 2s linear infinite;
+    position: relative;
+  }
+  .loading-ring::before {
+    content: '';
+    position: absolute;
+    inset: 12px;
+    border-radius: 50%;
+    border: 2px solid transparent;
+    border-bottom-color: var(--accent-gold);
+    border-left-color: var(--accent-rose);
+    animation: spinSlow 1.2s linear reverse infinite;
+  }
+  .loading-ring::after {
+    content: '🔮';
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 32px;
+    animation: spinSlow 4s linear infinite;
+  }
+  .loading-text {
+    font-size: 15px;
+    color: var(--text-secondary);
+    letter-spacing: 1px;
+    text-align: center;
+    transition: all 0.4s ease;
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+  }
+
+  /* ── SCREEN 5: Result Card ── */
+  #screen-result {
+    gap: 16px;
+  }
+  .result-card {
+    background: linear-gradient(170deg,
+      rgba(20,24,50,0.9) 0%,
+      rgba(14,18,40,0.85) 40%,
+      rgba(10,14,35,0.9) 100%);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(160,170,210,0.35);
+    border-radius: 20px;
+    padding: 28px 20px 22px;
+    width: 100%;
+    box-shadow: 0 16px 48px rgba(0,0,0,0.4), 0 0 80px rgba(120,140,220,0.08);
+    position: relative;
+    overflow: hidden;
+  }
+  .result-card::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle at 40% 0%, rgba(140,160,220,0.06), transparent 60%),
+                radial-gradient(circle at 70% 100%, rgba(200,160,120,0.05), transparent 50%);
+    pointer-events: none;
+  }
+
+  .archive-id {
+    text-align: center;
+    font-size: 11px;
+    letter-spacing: 3px;
+    color: var(--accent-cyan);
+    margin-bottom: 20px;
+    position: relative;
+  }
+
+  .avatar-row {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 18px;
+    position: relative;
+  }
+  .cosmic-avatar {
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 40% 35%, rgba(200,180,230,0.5), transparent 50%),
+                radial-gradient(circle at 60% 65%, rgba(130,180,210,0.4), transparent 50%),
+                linear-gradient(135deg, #1e2450, #141a38);
+    border: 2px solid rgba(160,180,220,0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 30px;
+    box-shadow: 0 0 30px rgba(140,160,220,0.2);
+  }
+
+  .basic-info {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 6px;
+    position: relative;
+  }
+  .info-chip {
+    font-size: 14px;
+    color: var(--text-primary);
+    padding: 4px 14px;
+    border-radius: 50px;
+    background: rgba(160,180,220,0.1);
+    border: 1px solid rgba(160,180,220,0.2);
+  }
+
+  .job-title-line {
+    text-align: center;
+    font-size: 18px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    color: #fff;
+    margin-top: 12px;
+    position: relative;
+  }
+  .company-name {
+    text-align: center;
+    font-size: 13px;
+    color: var(--text-secondary);
+    margin-top: 2px;
+    position: relative;
+  }
+
+  .salary-badge {
+    display: inline-block;
+    margin: 14px auto;
+    padding: 8px 24px;
+    border-radius: 50px;
+    background: rgba(232,180,75,0.12);
+    border: 1px solid rgba(212,165,116,0.3);
+    color: var(--accent-amber);
+    font-size: 16px;
+    font-weight: 700;
+    position: relative;
+    left: 50%;
+    transform: translateX(-50%);
+    letter-spacing: 1px;
+  }
+
+  .info-section {
+    width: 100%;
+    margin-top: 14px;
+    position: relative;
+  }
+  .info-section-title {
+    font-size: 11px;
+    letter-spacing: 2px;
+    color: var(--accent-lavender);
+    margin-bottom: 8px;
+    text-transform: uppercase;
+  }
+  .info-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 14px;
+    color: var(--text-secondary);
+    padding: 6px 0;
+  }
+  .info-row .info-icon {
+    width: 20px;
+    text-align: center;
+    flex-shrink: 0;
+  }
+
+  .butterfly-list {
+    list-style: none;
+    width: 100%;
+    position: relative;
+  }
+  .butterfly-list li {
+    padding: 8px 0 8px 16px;
+    border-left: 3px solid var(--accent-rose);
+    margin-bottom: 8px;
+    font-size: 14px;
+    color: var(--text-primary);
+    transition: border-color 0.3s;
+  }
+  .butterfly-list li:nth-child(2) { border-left-color: var(--accent-cyan); }
+  .butterfly-list li:nth-child(3) { border-left-color: var(--accent-gold); }
+  .butterfly-list li:nth-child(4) { border-left-color: var(--accent-lavender); }
+
+  .fork-highlight {
+    display: inline-block;
+    margin-top: 12px;
+    padding: 7px 16px;
+    border-radius: 50px;
+    background: rgba(196,122,138,0.12);
+    border: 1px solid rgba(196,122,138,0.3);
+    font-size: 13px;
+    color: var(--accent-rose);
+    letter-spacing: 0.5px;
+    position: relative;
+  }
+
+  .confidence-bar-wrap {
+    width: 100%;
+    margin-top: 14px;
+    position: relative;
+  }
+  .confidence-label {
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-bottom: 6px;
+  }
+  .confidence-bar {
+    height: 6px;
+    border-radius: 3px;
+    background: rgba(120,140,220,0.15);
+    overflow: hidden;
+  }
+  .confidence-fill {
+    height: 100%;
+    border-radius: 3px;
+    background: linear-gradient(90deg, var(--accent-lavender), var(--accent-cyan));
+    transition: width 0.8s cubic-bezier(0.22, 0.61, 0.36, 1);
+  }
+
+  .result-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    width: 100%;
+    margin-top: 16px;
+  }
+
+  .disclaimer-text {
+    font-size: 11px;
+    color: var(--text-muted);
+    text-align: center;
+    margin-top: 12px;
+    line-height: 1.6;
+  }
+
+  /* ── Share Overlay ── */
+  .share-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(4, 6, 16, 0.92);
+    z-index: 100;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+  }
+  .share-overlay.active {
+    display: flex;
+  }
+  .share-card {
+    background: rgba(20,24,50,0.9);
+    border: 1px solid var(--border-glow);
+    border-radius: 20px;
+    padding: 32px 24px;
+    text-align: center;
+    max-width: 320px;
+  }
+  .share-card h3 {
+    font-size: 18px;
+    margin-bottom: 8px;
+    letter-spacing: 1px;
+  }
+  .share-card p {
+    font-size: 14px;
+    color: var(--text-secondary);
+    margin-bottom: 6px;
+  }
+  .share-xhs-id {
+    display: inline-block;
+    margin: 12px 0;
+    padding: 8px 20px;
+    border-radius: 50px;
+    background: rgba(255, 80, 80, 0.15);
+    border: 1px solid rgba(255, 80, 80, 0.3);
+    color: #ff6b6b;
+    font-weight: 600;
+    font-size: 14px;
+  }
+  .share-close {
+    margin-top: 12px;
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    font-size: 14px;
+    cursor: pointer;
+    font-family: inherit;
+  }
+
+  /* ── Responsive ── */
+  @media (min-width: 440px) {
+    .app-container { padding: 40px 24px 60px; }
+    .landing-title { font-size: 32px; }
+  }
+  @media (max-width: 340px) {
+    .landing-title { font-size: 24px; }
+    .job-title-line { font-size: 16px; }
+    .tab-btn { font-size: 11px; padding: 8px 12px; }
+  }
+
+  /* ── Toast ── */
+  .toast {
+    position: fixed;
+    bottom: 40px;
+    left: 50%;
+    transform: translateX(-50%) translateY(100px);
+    background: rgba(20,25,55,0.95);
+    border: 1px solid var(--border-glow);
+    border-radius: 50px;
+    padding: 12px 28px;
+    font-size: 14px;
+    color: #fff;
+    z-index: 200;
+    transition: transform 0.35s cubic-bezier(0.22, 0.61, 0.36, 1);
+    pointer-events: none;
+  }
+  .toast.show {
+    transform: translateX(-50%) translateY(0);
+  }
+
+  /* ── Particle highlight for selected ── */
+  .highlight-dot {
+    position: absolute;
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background: var(--accent-gold);
+    animation: twinkle 2s ease-in-out infinite;
+  }
+</style>
+</head>
+<body>
+
+<canvas id="starfield"></canvas>
+
+<div class="app-container">
+
+  <!-- ═══════════ SCREEN 1: LANDING ═══════════ -->
+  <div id="screen-landing" class="screen active">
+    <div class="landing-icon"></div>
+    <h1 class="landing-title">如果当年的你<br>选了另一条路</h1>
+    <p class="landing-subtitle">测测你的 B 面人生长什么样</p>
+    <button class="btn-primary" onclick="goToScreen('screen-select')">
+      ✦ 开启平行宇宙
+    </button>
+  </div>
+
+  <!-- ═══════════ SCREEN 2: FORK SELECTION ═══════════ -->
+  <div id="screen-select" class="screen">
+    <p class="section-label">选择一个分叉点</p>
+    <div class="tab-bar" id="tabBar">
+      <button class="tab-btn active" data-tab="career">💼 职业</button>
+      <button class="tab-btn" data-tab="love">💕 感情</button>
+      <button class="tab-btn" data-tab="city">🌆 城市</button>
+      <button class="tab-btn" data-tab="edu">📚 教育</button>
+      <button class="tab-btn" data-tab="drama">⚡ 戏剧性</button>
+    </div>
+
+    <div id="forkContainer"></div>
+
+    <div class="sticky-bottom">
+      <button class="btn-primary" id="btnContinue" disabled onclick="goToScreen('screen-input')">
+        继续 →
+      </button>
+    </div>
+  </div>
+
+  <!-- ═══════════ SCREEN 3: INFO INPUT ═══════════ -->
+  <div id="screen-input" class="screen">
+    <div class="glass-card" style="text-align:center">
+      <p style="font-size:18px;font-weight:700;letter-spacing:1px;margin-bottom:24px">✨ 你是谁？</p>
+
+      <div class="input-group">
+        <label class="input-label">昵称</label>
+        <input class="text-input" type="text" id="inputName" placeholder="你的名字（或昵称）" maxlength="20">
+      </div>
+
+      <div class="input-group" style="margin-top:16px">
+        <label class="input-label">性别</label>
+        <div class="gender-toggle">
+          <button class="gender-btn" data-gender="female" onclick="selectGender('female', this)">👩 女</button>
+          <button class="gender-btn selected" data-gender="male" onclick="selectGender('male', this)">👨 男</button>
+        </div>
+      </div>
+
+      <div class="input-group" style="margin-top:16px">
+        <label class="input-label">年龄</label>
+        <div class="age-slider-wrap">
+          <span style="color:var(--text-muted);font-size:13px">18</span>
+          <input class="age-slider" type="range" id="inputAge" min="18" max="60" value="28">
+          <span class="age-value" id="ageDisplay">28</span>
+          <span style="color:var(--text-muted);font-size:13px">60</span>
+        </div>
+      </div>
+
+      <button class="btn-primary" style="margin-top:28px;width:100%" id="btnSimulate" onclick="startSimulation()">
+        🚀 开始推演
+      </button>
+    </div>
+  </div>
+
+  <!-- ═══════════ SCREEN 4: LOADING ═══════════ -->
+  <div id="screen-loading" class="screen">
+    <div class="loading-ring"></div>
+    <div class="loading-text" id="loadingText">正在搜索平行宇宙…</div>
+  </div>
+
+  <!-- ═══════════ SCREEN 5: RESULT ═══════════ -->
+  <div id="screen-result" class="screen">
+    <div class="result-card" id="resultCard">
+      <div class="archive-id" id="archiveId">平行宇宙档案 #42817</div>
+      <div class="avatar-row">
+        <div class="cosmic-avatar" id="avatarIcon">🌠</div>
+      </div>
+      <div class="basic-info" id="basicInfo"></div>
+      <div class="job-title-line" id="jobTitle"></div>
+      <div class="company-name" id="companyName"></div>
+      <div class="salary-badge" id="salaryBadge"></div>
+
+      <div class="info-section">
+        <div class="info-section-title">📖 蝴蝶效应</div>
+        <ul class="butterfly-list" id="butterflyList"></ul>
+      </div>
+
+      <div style="display:flex;justify-content:center">
+        <span class="fork-highlight" id="forkHighlight"></span>
+      </div>
+
+      <div class="confidence-bar-wrap">
+        <div class="confidence-label" id="confidenceLabel">在 1000 次模拟中，此人生线出现概率</div>
+        <div class="confidence-bar">
+          <div class="confidence-fill" id="confidenceFill" style="width:0%"></div>
+        </div>
+        <div style="text-align:right;font-size:13px;color:var(--accent-cyan);margin-top:4px;font-weight:700" id="confidencePercent">0%</div>
+      </div>
+
+      <p class="disclaimer-text">⚠ 本结果为随机模拟，仅供娱乐。<br>人生无法被算法预测，你的未来始终在自己手中。</p>
+    </div>
+
+    <div class="result-actions">
+      <button class="btn-primary" onclick="takeScreenshot()" style="width:100%">
+        📸 保存图片分享
+      </button>
+      <button class="btn-ghost" onclick="resetAll()" style="width:100%">
+        🔄 再测一次
+      </button>
+    </div>
+  </div>
+
+</div>
+
+<!-- ═══════════ SHARE OVERLAY ═══════════ -->
+<div class="share-overlay" id="shareOverlay">
+  <div class="share-card">
+    <h3>📸 截图已生成</h3>
+    <p>长按保存图片 → 发小红书笔记</p>
+    <p style="font-size:12px;color:var(--text-muted)">关注博主，解锁更多人生问题</p>
+    <div class="share-xhs-id">小红书号：待填</div>
+    <button class="share-close" onclick="closeShare()">关闭</button>
+  </div>
+</div>
+
+<!-- ═══════════ TOAST ═══════════ -->
+<div class="toast" id="toast"></div>
+
+<!-- ═══════════ LANDING DISCLAIMER (fixed) ═══════════ -->
+<div class="landing-disclaimer" id="landingDisclaimer">
+  * 本页面所有结果为随机生成，仅供娱乐，不代表真实预测
+</div>
+
+<!-- ═══════════════════════════════════════════════ -->
+<!--  SCRIPTS                                         -->
+<!-- ═══════════════════════════════════════════════ -->
+<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js">
+</script>
+<script>
+// ═══════════════ STARFIELD ═══════════════
+const canvas = document.getElementById('starfield');
+const ctx = canvas.getContext('2d');
+let stars = [];
+let w, h;
+
+function resizeCanvas() {
+  w = canvas.width = window.innerWidth;
+  h = canvas.height = window.innerHeight;
+}
+resizeCanvas();
+window.addEventListener('resize', () => {
+  resizeCanvas();
+  initStars();
+});
+
+function initStars() {
+  const count = Math.floor((w * h) / 1800);
+  stars = [];
+  for (let i = 0; i < count; i++) {
+    stars.push({
+      x: Math.random() * w,
+      y: Math.random() * h,
+      r: Math.random() * 1.6 + 0.3,
+      opacity: Math.random(),
+      speed: Math.random() * 0.008 + 0.003,
+      phase: Math.random() * Math.PI * 2,
+      hue: 200 + Math.random() * 60
+    });
+  }
+}
+initStars();
+
+function drawStars() {
+  ctx.clearRect(0, 0, w, h);
+  stars.forEach(s => {
+    const alpha = 0.2 + 0.6 * (0.5 + 0.5 * Math.sin(Date.now() * s.speed + s.phase));
+    ctx.beginPath();
+    ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+    ctx.fillStyle = `hsla(${s.hue},50%,75%,${alpha})`;
+    ctx.fill();
+
+    // Glow halo for bigger stars
+    if (s.r > 1.2 && alpha > 0.5) {
+      ctx.beginPath();
+      ctx.arc(s.x, s.y, s.r * 2.5, 0, Math.PI * 2);
+      ctx.fillStyle = `hsla(${s.hue},60%,70%,${alpha * 0.12})`;
+      ctx.fill();
+    }
+  });
+  requestAnimationFrame(drawStars);
+}
+drawStars();
+
+// ═══════════════ SCREEN NAVIGATION ═══════════════
+function goToScreen(screenId) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  const target = document.getElementById(screenId);
+  if (target) {
+    target.classList.add('active');
+    // Re-trigger animation
+    target.style.animation = 'none';
+    target.offsetHeight;
+    target.style.animation = '';
+  }
+
+  // Show/hide landing disclaimer
+  const disc = document.getElementById('landingDisclaimer');
+  if (disc) disc.style.display = screenId === 'screen-landing' ? 'block' : 'none';
+
+  // Scroll to top
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// ═══════════════ SCREEN 2: FORK DATA ═══════════════
+const forkData = {
+  career: [
+    { id:'c1', q:'毕业后去了大城市 vs 回了老家', hint:'选了大城市，人生可能性更大' },
+    { id:'c2', q:'考公/进体制 vs 去私企/创业', hint:'选了私企，自由但不确定' },
+    { id:'c3', q:'30岁裸辞转行', hint:'从零开始，不确定是否正确' },
+    { id:'c4', q:'为了高薪留在不喜欢的行业 vs 降薪做热爱', hint:'选了热爱，钱少但每天有光' },
+    { id:'c5', q:'接受了异地调派 vs 为了某人留下', hint:'为了某个人留下来了' },
+  ],
+  love: [
+    { id:'l1', q:'跟前任没有分手', hint:'如果那次吵架和好了' },
+    { id:'l2', q:'接受了那个追你很久的人', hint:'也许错过了最适合的人' },
+    { id:'l3', q:'没有为了结婚而结婚', hint:'拒绝将就的婚姻' },
+    { id:'l4', q:'22岁就结婚 vs 一直单身到35', hint:'早婚早育的另一条路' },
+    { id:'l5', q:'选了"更合适"而不是"更有感觉"的人', hint:'理性和感性的博弈' },
+  ],
+  city: [
+    { id:'t1', q:'搬去大理/成都/海边小镇', hint:'逃离北上广，慢下来' },
+    { id:'t2', q:'出国留学/工作后没有回来', hint:'另一个国家的另一种生活' },
+    { id:'t3', q:'一直租房 vs 背上30年房贷', hint:'自由和安稳的取舍' },
+  ],
+  edu: [
+    { id:'e1', q:'高考志愿选了热爱的冷门专业', hint:'选了考古/天文/哲学' },
+    { id:'e2', q:'大学辍学去创业', hint:'退学创业的平行人生' },
+    { id:'e3', q:'35岁回去读研/读博', hint:'中年重返校园' },
+  ],
+  drama: [
+    { id:'d1', q:'五年前All in了那个后来爆发的方向', hint:'比特币、AI、某个风口' },
+    { id:'d2', q:'当年勇敢表白了/说出那句话', hint:'没说出口的那句话' },
+    { id:'d3', q:'出生在另一个家庭', hint:'如果换了父母，你是谁？' },
+  ],
+};
+
+let selectedForkId = null;
+
+function renderForkList(category) {
+  const container = document.getElementById('forkContainer');
+  const items = forkData[category] || [];
+  container.innerHTML = items.map(item => `
+    <div class="fork-option" data-fork-id="${item.id}" onclick="selectFork('${item.id}', this)">
+      <div class="fork-question">${item.q}</div>
+      <div class="fork-hint">${item.hint}</div>
+    </div>
+  `).join('');
+  container.className = 'fork-list active';
+  selectedForkId = null;
+  document.getElementById('btnContinue').disabled = true;
+}
+
+function selectFork(forkId, el) {
+  document.querySelectorAll('.fork-option').forEach(o => o.classList.remove('selected'));
+  el.classList.add('selected');
+  selectedForkId = forkId;
+  document.getElementById('btnContinue').disabled = false;
+}
+
+// Tab switching
+document.getElementById('tabBar').addEventListener('click', e => {
+  if (e.target.classList.contains('tab-btn')) {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    e.target.classList.add('active');
+    renderForkList(e.target.dataset.tab);
+  }
+});
+
+// Init with first tab
+renderForkList('career');
+
+// ═══════════════ SCREEN 3: INPUT ═══════════════
+let userGender = 'male';
+
+function selectGender(gender, el) {
+  userGender = gender;
+  document.querySelectorAll('.gender-btn').forEach(b => b.classList.remove('selected'));
+  el.classList.add('selected');
+}
+
+// Age slider
+const ageSlider = document.getElementById('inputAge');
+const ageDisplay = document.getElementById('ageDisplay');
+ageSlider.addEventListener('input', () => {
+  ageDisplay.textContent = ageSlider.value;
+});
+
+function startSimulation() {
+  const name = document.getElementById('inputName').value.trim();
+  if (!name) {
+    showToast('请输入你的名字或昵称');
+    return;
+  }
+  if (!selectedForkId) {
+    goToScreen('screen-select');
+    showToast('请先选择一个分叉点');
+    return;
+  }
+  goToScreen('screen-loading');
+  runLoadingSequence(name, parseInt(ageSlider.value), userGender);
+}
+
+// ═══════════════ SCREEN 4: LOADING ═══════════════
+function runLoadingSequence(name, age, gender) {
+  const loadingText = document.getElementById('loadingText');
+  const archiveNum = Math.floor(10000 + Math.random() * 90000);
+  const foundCount = Math.floor(Math.random() * 7) + 3;
+  const sequences = [
+    { text: `正在搜索平行宇宙 #${archiveNum}...`, delay: 0 },
+    { text: `已找到 ${foundCount} 条可能的人生线`, delay: 900 },
+    { text: '正在匹配最可能的那一条...', delay: 1700 },
+    { text: '同步蝴蝶效应数据...', delay: 2200 },
+  ];
+
+  sequences.forEach(seq => {
+    setTimeout(() => {
+      loadingText.style.opacity = '0';
+      setTimeout(() => {
+        loadingText.textContent = seq.text;
+        loadingText.style.opacity = '1';
+      }, 200);
+    }, seq.delay);
+  });
+
+  setTimeout(() => {
+    generateResult(name, age, gender, Math.floor(10000 + Math.random() * 90000));
+  }, 3000);
+}
+
+// ═══════════════ RESULT GENERATION ENGINE ═══════════════
+const maleNames = ['张伟', '李强', '王磊', '刘洋', '陈峰', '杨帆', '赵宇', '周航'];
+const femaleNames = ['张薇', '李婷', '王芳', '刘洋', '陈雪', '杨帆', '赵琳', '周悦'];
+
+// Template pools by fork type
+const outcomePools = {
+  // CAREER
+  c1: { // 大城市 vs 老家
+    bigCity: {
+      jobs: [
+        { title:'高级产品经理', company:'某互联网大厂', salary:'年薪 45-65 万', edu:'上海交通大学 · 硕士' },
+        { title:'资深设计师', company:'某4A广告公司', salary:'年薪 35-50 万', edu:'中国美术学院 · 本科' },
+        { title:'投资经理', company:'某头部VC', salary:'年薪 60-90 万', edu:'复旦大学 · MBA' },
+        { title:'数据科学家', company:'某AI创业公司', salary:'年薪 55-80 万', edu:'浙江大学 · 博士' },
+        { title:'内容总监', company:'某头部自媒体', salary:'年薪 40-60 万', edu:'中国传媒大学 · 硕士' },
+      ],
+      butterfly_good: [
+        '在行业峰会上遇到了改变你职业生涯的导师',
+        '养了一只猫，治好了你的孤独感',
+        '学会了在末班地铁上写日记',
+        '每年出国旅行两次，眼界完全不同',
+      ],
+      butterfly_bad: [
+        '错过了奶奶最后一面',
+        '连续加班到凌晨成为常态',
+        '与老家的朋友渐渐断了联系',
+      ],
+    },
+    hometown: {
+      jobs: [
+        { title:'公务员 · 科长', company:'某市直机关', salary:'年薪 15-22 万', edu:'某211大学 · 本科' },
+        { title:'中学教师', company:'市重点中学', salary:'年薪 12-18 万', edu:'华东师范大学 · 本科' },
+        { title:'银行客户经理', company:'某地方银行', salary:'年薪 18-28 万', edu:'某财经大学 · 本科' },
+      ],
+      butterfly_good: [
+        '陪父母吃了很多顿饭，他们很开心',
+        '在老家买了房，压力和房贷都可控',
+        '周末可以开车去山里，生活质感很好',
+      ],
+      butterfly_bad: [
+        '偶尔看朋友圈里的大城市同学，会沉默一会儿',
+        '相亲了无数次，始终觉得缺了什么',
+      ],
+    },
+  },
+  c2: { // 考公 vs 私企
+    gong: {
+      jobs: [
+        { title:'公务员 · 副处长', company:'某省直机关', salary:'年薪 20-30 万', edu:'中国人民大学 · 硕士' },
+        { title:'事业编 · 科室主任', company:'某三甲医院', salary:'年薪 25-35 万', edu:'北京大学医学部 · 硕士' },
+      ],
+      butterfly_good: ['体制内的稳定感让你睡得很踏实', '社会地位高，亲戚朋友都尊重你'],
+      butterfly_bad: ['偶尔会觉得日复一日的工作像温水煮青蛙', '看着体制外的高薪，有时也会心跳加速'],
+    },
+    siqi: {
+      jobs: [
+        { title:'联合创始人', company:'某B轮科技公司', salary:'年薪 50-100 万+期权', edu:'某985大学 · 本科' },
+        { title:'自由职业者 · 独立顾问', company:'自雇', salary:'年薪 30-80 万（波动大）', edu:'某211大学 · 本科' },
+        { title:'小老板', company:'经营一家连锁餐饮', salary:'年入 40-70 万', edu:'某大学 · 本科（肄业）' },
+      ],
+      butterfly_good: ['你是自己的老板，为自己而活', '有几年过得很难，但熬过来了，现在回头看觉得值'],
+      butterfly_bad: ['凌晨三点还在回客户消息', '有几次差点破产，那种恐惧体制内的人永远不会懂'],
+    },
+  },
+  c3: { // 30岁裸辞
+    success: {
+      jobs: [
+        { title:'独立摄影师/博主', company:'自由职业', salary:'年收入 25-50 万', edu:'自学成才' },
+        { title:'民宿主理人', company:'自己开的民宿', salary:'年收入 20-40 万', edu:'前大厂打工人' },
+        { title:'心理咨询师', company:'个人工作室', salary:'年收入 30-60 万', edu:'转行考取资质' },
+      ],
+      butterfly_good: ['终于不是被闹钟叫醒，而是被阳光叫醒', '发现原来自己可以做那么多不同的事'],
+      butterfly_bad: ['前半年几乎零收入，靠存款撑着', '父母每次打电话都问"什么时候找个正经工作"'],
+    },
+    fail: {
+      jobs: [
+        { title:'回到原行业 · 但降了一级', company:'某中型企业', salary:'年薪 20-30 万', edu:'同前' },
+      ],
+      butterfly_good: ['虽然失败了，但你不再后悔——至少你试过了'],
+      butterfly_bad: ['转行的路比你想象的难很多', '房贷不会等你追梦'],
+    },
+  },
+  c4: { // 高薪vs热爱
+    passion: {
+      jobs: [
+        { title:'花艺师', company:'自己的花店', salary:'年收入 12-20 万', edu:'前金融从业者' },
+        { title:'面包师', company:'社区面包房', salary:'年收入 10-18 万', edu:'前程序员' },
+        { title:'独立书店老板', company:'街角书店', salary:'年收入 8-15 万', edu:'前咨询顾问' },
+        { title:'瑜伽教练', company:'独立工作室', salary:'年收入 15-25 万', edu:'前投行分析师' },
+      ],
+      butterfly_good: ['每天醒来都期待今天的工作', '你变得比以前温柔了，朋友都说你变了'],
+      butterfly_bad: ['收入确实少了，有时候还是会怀念以前大手大脚的日子'],
+    },
+  },
+  c5: { // 异地调派 vs 留下
+    stay: {
+      jobs: [
+        { title:'中小企业中层', company:'本地某公司', salary:'年薪 20-30 万', edu:'不变' },
+      ],
+      butterfly_good: ['你们还在一起，这是最重要的', '孩子在祖父母身边长大，语言能力特别好'],
+      butterfly_bad: ['有时会想：如果当年去了，现在会不会是另一种高度'],
+    },
+    go: {
+      jobs: [
+        { title:'区域负责人', company:'某外企', salary:'年薪 60-90 万', edu:'不变' },
+      ],
+      butterfly_good: ['职业发展确实快了很多', '在新的城市建立了全新的社交圈'],
+      butterfly_bad: ['你们没有走到最后', '每年回家次数不超过两次'],
+    },
+  },
+  // LOVE
+  l1: { // 跟前任没分手
+    together: {
+      jobs: [{ title:'某公司中层', company:'—', salary:'年薪 25-40 万', edu:'—' }],
+      butterfly_good: ['你们熬过了那次危机，关系反而更深了', '现在有了孩子，虽然累但很幸福'],
+      butterfly_bad: ['那次分手其实是对的——后来你们还是因为同样的原因分开了'],
+    },
+  },
+  l2: { // 接受了追你的人
+    accept: {
+      jobs: [{ title:'—', company:'—', salary:'—', edu:'—' }],
+      butterfly_good: ['原来被爱比爱人更让人安心', '他/她比你想象的更懂你'],
+      butterfly_bad: ['你始终没有真正爱上他/她，这对双方都不公平'],
+    },
+  },
+  l3: { // 不将就结婚
+    solo: {
+      jobs: [{ title:'某行业资深', company:'—', salary:'年薪 35-60 万', edu:'—' }],
+      butterfly_good: ['35岁的你经济独立、精神自由、朋友很多', '你活成了自己羡慕的样子'],
+      butterfly_bad: ['偶尔也会在深夜觉得孤独', '过年回家亲戚的目光让人窒息'],
+    },
+  },
+  l4: { // 早婚 vs 晚婚
+    early: {
+      jobs: [{ title:'全职妈妈/爸爸', company:'—', salary:'家庭收入 15-25 万', edu:'—' }],
+      butterfly_good: ['孩子18岁时你才40岁，还有大把时间做自己', '年轻有精力带娃'],
+      butterfly_bad: ['错过了职业发展的黄金期', '同学聚会聊的话题你插不上嘴'],
+    },
+    late: {
+      jobs: [{ title:'某领域专家', company:'—', salary:'年薪 50-80 万', edu:'—' }],
+      butterfly_good: ['你的事业到了顶峰，有底气和资本选择想要的生活'],
+      butterfly_bad: ['生育压力让你焦虑', '父母年纪大了，还没看到你安定下来'],
+    },
+  },
+  l5: { // 合适 vs 有感觉
+    suitable: {
+      jobs: [{ title:'—', company:'—', salary:'—', edu:'—' }],
+      butterfly_good: ['婚姻很稳定，你们是最好的队友', '家庭和睦，外人看来就是模范夫妻'],
+      butterfly_bad: ['有时候半夜醒来，看着身边人的脸，会想"这就是爱吗？"'],
+    },
+  },
+  // CITY
+  t1: { // 逃离北上广
+    moved: {
+      jobs: [
+        { title:'民宿主理人', company:'大理某民宿', salary:'年收入 15-25 万', edu:'前大厂打工人' },
+        { title:'自由插画师', company:'接稿为生', salary:'年收入 10-20 万', edu:'前设计师' },
+        { title:'咖啡店老板', company:'社区咖啡馆', salary:'年收入 12-22 万', edu:'前咨询师' },
+        { title:'数字游民', company:'远程办公', salary:'年收入 20-35 万', edu:'某985 · 本科' },
+      ],
+      butterfly_good: ['每天推开窗看到苍山洱海', '学会了慢下来，焦虑好了大半', '认识了一群跟你一样的"逃离者"'],
+      butterfly_bad: ['有时候还是会怀念大城市的繁华', '收入确实少了，不敢生病'],
+    },
+  },
+  t2: { // 出国没回来
+    abroad: {
+      jobs: [
+        { title:'软件工程师', company:'硅谷某科技公司', salary:'年薪 $150k-250k', edu:'Stanford · MS' },
+        { title:'建筑师', company:'伦敦某事务所', salary:'年薪 £60k-90k', edu:'UCL · MA' },
+        { title:'大学研究员', company:'某研究机构', salary:'年薪 $80k-120k', edu:'PhD' },
+        { title:'创业者', company:'自己的公司', salary:'年收入不定', edu:'某海外名校' },
+      ],
+      butterfly_good: ['拿到了永居，孩子在这里长大', '每年回国一次，但每次都很珍惜', '英语说得跟母语一样流利'],
+      butterfly_bad: ['父母老了，你在另一个半球', '春节回不了家，看朋友圈吃年夜饭会难受', '有时候觉得哪里都不是家'],
+    },
+  },
+  t3: { // 租房 vs 房贷
+    rent: {
+      jobs: [{ title:'某行业资深', company:'—', salary:'年薪 30-50 万', edu:'—' }],
+      butterfly_good: ['每两年换一个街区住，体验不同社区', '没有房贷压力，随时可以换个城市生活', '钱花在旅行和体验上，而不是还贷款'],
+      butterfly_bad: ['搬家搬到麻木', '房东一句"房子要卖了"你就得走', '看着房价涨，有时候也会焦虑'],
+    },
+    mortgage: {
+      jobs: [{ title:'某企业中层', company:'—', salary:'年薪 25-40 万', edu:'—' }],
+      butterfly_good: ['有了自己的家，墙上打洞都不会有人管', '房子翻了三倍，资产安全感很强'],
+      butterfly_bad: ['30岁到50岁都在还贷', '不敢裸辞，不敢gap year'],
+    },
+  },
+  // EDU
+  e1: { // 热爱的冷门专业
+    coldMajor: {
+      jobs: [
+        { title:'考古学家', company:'某省考古研究所', salary:'年薪 12-20 万', edu:'北京大学 · 考古系' },
+        { title:'天文台研究员', company:'某天文台', salary:'年薪 15-25 万', edu:'南京大学 · 天文系' },
+        { title:'古籍修复师', company:'某图书馆', salary:'年薪 10-18 万', edu:'复旦大学 · 古典文献' },
+        { title:'哲学系教授', company:'某高校', salary:'年薪 18-30 万', edu:'某985 · 哲学博士' },
+      ],
+      butterfly_good: ['每天做的是你真正热爱的事', '你眼中的世界跟别人不一样', '同行的都是真正懂你的人'],
+      butterfly_bad: ['同学聚会时，学金融的已经财务自由了', '爸妈花了很长时间才接受你的专业'],
+    },
+  },
+  e2: { // 大学辍学
+    dropout: {
+      jobs: [
+        { title:'连续创业者', company:'第三家公司', salary:'年收入 0-500 万', edu:'大学肄业' },
+        { title:'自由开发者', company:'接项目为生', salary:'年收入 30-80 万', edu:'自学成才' },
+        { title:'某垂直领域网红', company:'自媒体', salary:'年收入 50-200 万', edu:'大学肄业' },
+      ],
+      butterfly_good: ['你是朋友圈里最敢冒险的那个人', '比同龄人早跑了5年'],
+      butterfly_bad: ['有好几次差点撑不下去', '有时候会想：如果读完大学会不会更稳'],
+    },
+  },
+  e3: { // 35岁读研
+    backToSchool: {
+      jobs: [
+        { title:'转行成功的心理咨询师', company:'个人执业', salary:'年收入 20-40 万', edu:'35岁考入某校心理学系' },
+        { title:'高校教师', company:'某大学', salary:'年薪 15-25 万', edu:'博士毕业' },
+        { title:'行业顾问', company:'某咨询公司', salary:'年薪 35-60 万', edu:'MBA毕业' },
+      ],
+      butterfly_good: ['你是班上最认真的学生，因为你知道自己要什么', '毕业后的人生像重启了一样'],
+      butterfly_bad: ['跟年轻人一起上课，偶尔会觉得自己老了', '两年的空窗期对收入有影响'],
+    },
+  },
+  // DRAMA
+  d1: { // All in风口
+    win: {
+      jobs: [
+        { title:'已是财务自由的投资者', company:'自由生活', salary:'资产 3000-8000 万', edu:'—' },
+        { title:'某独角兽早期员工', company:'已套现离职', salary:'资产 1000-3000 万', edu:'—' },
+      ],
+      butterfly_good: ['财务自由后，你的焦虑消失了', '现在的时间全花在自己想做的事上', '给父母买了最好的房子'],
+      butterfly_bad: ['暴富后有些朋友变了', '突然有钱的眩晕感持续了很久'],
+    },
+    miss: {
+      jobs: [
+        { title:'某行业普通从业者', company:'—', salary:'年薪 20-40 万', edu:'—' },
+      ],
+      butterfly_good: ['虽然没有暴富，但你的生活很安稳', '身边都是真诚的朋友'],
+      butterfly_bad: ['你当时确实听说了，但没有行动——这是最痛苦的', '回头看，有几次类似的机会你都在门口徘徊'],
+    },
+  },
+  d2: { // 当年说了那句话
+    said: {
+      jobs: [{ title:'—', company:'—', salary:'—', edu:'—' }],
+      butterfly_good: ['那句话说出口之后，一切都变了——往好的方向', '你们在一起了/你们和解了/你得到了那个机会'],
+      butterfly_bad: ['那句话改变了你们的关系，不是所有勇敢都有好结果'],
+    },
+  },
+  d3: { // 出生在另一个家庭
+    anotherFamily: {
+      jobs: [
+        { title:'画家/音乐家', company:'自由创作', salary:'家庭支持，不用为钱发愁', edu:'从小接受最好的教育' },
+        { title:'某家族企业接班人', company:'家族企业', salary:'含着金钥匙出生', edu:'海外名校' },
+        { title:'完全不同的人生起点', company:'—', salary:'—', edu:'可能连大学都没机会上' },
+      ],
+      butterfly_good: ['你的起点完全不同，人生的可能性被彻底改变'],
+      butterfly_bad: ['出生不能选择，但你现在的人生是你自己走出来的', '另一种出身的你，可能根本不是现在的你'],
+    },
+  },
+};
+
+// Helper to get city
+const cities = ['深圳','上海','杭州','成都','北京','大理','厦门','苏州','南京','重庆'];
+
+// Random pick weighted
+function pick(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+function pickN(arr, n) {
+  const shuffled = [...arr].sort(() => Math.random() - 0.5);
+  return shuffled.slice(0, n);
+}
+
+// Generate position labels by gender
+function labelFor(gender, type) {
+  const map = {
+    male: { single:'单身', married:'已婚', child:'有一个孩子' },
+    female: { single:'单身贵族', married:'已婚', child:'有一个孩子' },
+  };
+  return map[gender]?.[type] || type;
+}
+
+function generateResult(name, age, gender, archiveNum) {
+  const forkId = selectedForkId;
+  const pool = outcomePools[forkId];
+
+  // Build a result object
+  let job, company, salary, edu, butterflies = [];
+  let city = pick(cities);
+  let confidence = Math.floor(Math.random() * 25) + 12; // 12-36%
+
+  // Map fork to actual data
+  if (forkId === 'c1') {
+    const path = Math.random() > 0.5 ? 'bigCity' : 'hometown';
+    const j = pick(pool[path].jobs);
+    job = j.title; company = j.company; salary = j.salary; edu = j.edu;
+    butterflies = [...pickN(pool[path].butterfly_good, 2), pick(pool[path].butterfly_bad)];
+    city = path === 'bigCity' ? pick(['深圳','上海','杭州','北京']) : pick(['长沙','南昌','洛阳','绵阳']);
+    confidence = path === 'bigCity' ? Math.floor(Math.random() * 20) + 18 : Math.floor(Math.random() * 20) + 30;
+  } else if (forkId === 'c2') {
+    const path = Math.random() > 0.5 ? 'gong' : 'siqi';
+    const j = pick(pool[path].jobs);
+    job = j.title; company = j.company; salary = j.salary; edu = j.edu;
+    butterflies = [...pickN(pool[path].butterfly_good, 2), pick(pool[path].butterfly_bad)];
+    city = path === 'gong' ? pick(['北京','南京','武汉','西安']) : pick(['深圳','杭州','上海','成都']);
+    confidence = Math.floor(Math.random() * 22) + 15;
+  } else if (forkId === 'c3') {
+    const path = Math.random() > 0.65 ? 'success' : 'fail';
+    const j = pick(pool[path].jobs);
+    job = j.title; company = j.company; salary = j.salary; edu = j.edu;
+    butterflies = [...pickN(pool[path].butterfly_good, 2), pick(pool[path].butterfly_bad)];
+    city = pick(['大理','成都','厦门','杭州']);
+    confidence = path === 'success' ? Math.floor(Math.random() * 18) + 10 : Math.floor(Math.random() * 15) + 25;
+  } else if (forkId === 'c4') {
+    const j = pick(pool.passion.jobs);
+    job = j.title; company = j.company; salary = j.salary; edu = j.edu;
+    butterflies = [...pickN(pool.passion.butterfly_good, 2)];
+    city = pick(['杭州','大理','成都','厦门','苏州']);
+    confidence = Math.floor(Math.random() * 15) + 8;
+  } else if (forkId === 'c5') {
+    const path = Math.random() > 0.5 ? 'stay' : 'go';
+    const j = pick(pool[path].jobs);
+    job = j.title; company = j.company; salary = j.salary; edu = j.edu;
+    butterflies = [...pickN(pool[path].butterfly_good, 2), pick(pool[path].butterfly_bad)];
+    if (path === 'go') { city = pick(['新加坡','纽约','伦敦','香港']); butterflies.push('拿到了海外永居'); }
+    confidence = Math.floor(Math.random() * 20) + 15;
+  } else if (forkId === 'l1') {
+    const j = pick(pool.together.jobs);
+    job = j.title; company = j.company; salary = j.salary; edu = j.edu;
+    butterflies = [pick(pool.together.butterfly_good)];
+    if (Math.random() > 0.5) butterflies.push(pick(pool.together.butterfly_bad));
+    butterflies.push('你们的关系成了朋友圈里被羡慕的那种');
+    city = pick(cities);
+    confidence = Math.floor(Math.random() * 25) + 15;
+  } else if (forkId === 'l2') {
+    const j = pick(pool.accept.jobs);
+    job = j.title; company = j.company; salary = j.salary; edu = j.edu;
+    butterflies = [pick(pool.accept.butterfly_good)];
+    if (Math.random() > 0.6) butterflies.push(pick(pool.accept.butterfly_bad));
+    city = pick(cities);
+    confidence = Math.floor(Math.random() * 20) + 10;
+  } else if (forkId === 'l3') {
+    const j = pick(pool.solo.jobs);
+    job = j.title; company = j.company; salary = j.salary; edu = j.edu;
+    butterflies = [...pickN(pool.solo.butterfly_good, 2)];
+    if (Math.random() > 0.5) butterflies.push(pick(pool.solo.butterfly_bad));
+    city = pick(['上海','深圳','北京','成都']);
+    confidence = Math.floor(Math.random() * 20) + 20;
+  } else if (forkId === 'l4') {
+    const path = age > 25 ? 'late' : 'early';
+    const j = pick(pool[path].jobs);
+    job = j.title; company = j.company; salary = j.salary; edu = j.edu;
+    butterflies = [...pickN(pool[path].butterfly_good, 2), pick(pool[path].butterfly_bad)];
+    city = pick(cities);
+    confidence = Math.floor(Math.random() * 22) + 16;
+  } else if (forkId === 'l5') {
+    const j = pick(pool.suitable.jobs);
+    job = j.title; company = j.company; salary = j.salary; edu = j.edu;
+    butterflies = [pick(pool.suitable.butterfly_good), pick(pool.suitable.butterfly_bad)];
+    city = pick(cities);
+    confidence = Math.floor(Math.random() * 20) + 18;
+  } else if (forkId === 't1') {
+    const j = pick(pool.moved.jobs);
+    job = j.title; company = j.company; salary = j.salary; edu = j.edu;
+    butterflies = [...pickN(pool.moved.butterfly_good, 2), pick(pool.moved.butterfly_bad)];
+    city = pick(['大理','成都','厦门','北海','丽江']);
+    confidence = Math.floor(Math.random() * 15) + 10;
+  } else if (forkId === 't2') {
+    const j = pick(pool.abroad.jobs);
+    job = j.title; company = j.company; salary = j.salary; edu = j.edu;
+    butterflies = [...pickN(pool.abroad.butterfly_good, 2), pick(pool.abroad.butterfly_bad)];
+    city = pick(['旧金山','伦敦','新加坡','东京','悉尼']);
+    confidence = Math.floor(Math.random() * 18) + 12;
+  } else if (forkId === 't3') {
+    const path = Math.random() > 0.5 ? 'rent' : 'mortgage';
+    const j = pick(pool[path].jobs);
+    job = j.title; company = j.company; salary = j.salary; edu = j.edu;
+    butterflies = [...pickN(pool[path].butterfly_good, 2), pick(pool[path].butterfly_bad)];
+    city = pick(cities);
+    confidence = path === 'rent' ? Math.floor(Math.random() * 18) + 10 : Math.floor(Math.random() * 15) + 22;
+  } else if (forkId === 'e1') {
+    const j = pick(pool.coldMajor.jobs);
+    job = j.title; company = j.company; salary = j.salary; edu = j.edu;
+    butterflies = [...pickN(pool.coldMajor.butterfly_good, 2), pick(pool.coldMajor.butterfly_bad)];
+    city = pick(['北京','南京','西安','兰州','沈阳']);
+    confidence = Math.floor(Math.random() * 15) + 8;
+  } else if (forkId === 'e2') {
+    const j = pick(pool.dropout.jobs);
+    job = j.title; company = j.company; salary = j.salary; edu = j.edu;
+    butterflies = [...pickN(pool.dropout.butterfly_good, 1), pick(pool.dropout.butterfly_bad)];
+    city = pick(['深圳','杭州','北京','上海']);
+    confidence = Math.floor(Math.random() * 15) + 5;
+  } else if (forkId === 'e3') {
+    const j = pick(pool.backToSchool.jobs);
+    job = j.title; company = j.company; salary = j.salary; edu = j.edu;
+    butterflies = [...pickN(pool.backToSchool.butterfly_good, 1), pick(pool.backToSchool.butterfly_bad)];
+    city = pick(cities);
+    confidence = Math.floor(Math.random() * 18) + 14;
+  } else if (forkId === 'd1') {
+    const path = Math.random() > 0.8 ? 'win' : 'miss';
+    const j = pick(pool[path].jobs);
+    job = j.title; company = j.company; salary = j.salary; edu = j.edu;
+    butterflies = [...pickN(pool[path].butterfly_good, 2), pick(pool[path].butterfly_bad)];
+    city = pick(cities);
+    confidence = path === 'win' ? Math.floor(Math.random() * 5) + 2 : Math.floor(Math.random() * 20) + 25;
+  } else if (forkId === 'd2') {
+    const j = pick(pool.said.jobs);
+    job = j.title; company = j.company; salary = j.salary; edu = j.edu;
+    butterflies = [pick(pool.said.butterfly_good)];
+    if (Math.random() > 0.55) butterflies.push(pick(pool.said.butterfly_bad));
+    city = pick(cities);
+    confidence = Math.floor(Math.random() * 20) + 18;
+    butterflies.push('——那句话说出口之后，你就已经不再是原来的你');
+  } else if (forkId === 'd3') {
+    const j = pick(pool.anotherFamily.jobs);
+    job = j.title; company = j.company; salary = j.salary; edu = j.edu;
+    butterflies = [pick(pool.anotherFamily.butterfly_good), pick(pool.anotherFamily.butterfly_bad)];
+    city = pick(['北京','上海','香港','纽约','在一个完全不同的地方']);
+    confidence = Math.floor(Math.random() * 10) + 3;
+  } else {
+    // Generic fallback
+    const genericJobs = [
+      { title:'自由职业者', company:'自雇', salary:'年收入 20-50 万', edu:'某大学 · 本科' },
+      { title:'创业者', company:'自己的公司', salary:'年收入 30-100 万', edu:'某大学 · 本科' },
+      { title:'某行业资深专家', company:'某知名企业', salary:'年薪 40-70 万', edu:'某985 · 硕士' },
+      { title:'数字游民', company:'远程办公', salary:'年收入 25-45 万', edu:'某大学 · 本科' },
+    ];
+    const j = pick(genericJobs);
+    job = j.title; company = j.company; salary = j.salary; edu = j.edu;
+    butterflies = [
+      '你走上了完全不同的路，连你自己都感到惊讶',
+      '认识了全新的人，进入了全新的圈子',
+      '偶尔会想，如果在原来的时间线会怎样',
+    ];
+    confidence = Math.floor(Math.random() * 25) + 12;
+  }
+
+  // Add gender-specific butterflies
+  if (gender === 'female') {
+    butterflies = butterflies.map(b => b.replace('他/', '她/'));
+  }
+
+  // Get the fork question for highlight
+  let forkQuestion = '';
+  for (const cat of Object.values(forkData)) {
+    const found = cat.find(f => f.id === forkId);
+    if (found) { forkQuestion = found.q; break; }
+  }
+
+  // Update DOM
+  document.getElementById('archiveId').textContent = `平行宇宙档案 #${archiveNum}`;
+  document.getElementById('avatarIcon').textContent = gender === 'female' ? '🌙' : '🌟';
+  document.getElementById('basicInfo').innerHTML = `
+    <span class="info-chip">${name}</span>
+    <span class="info-chip">${gender === 'female' ? '女' : '男'}</span>
+    <span class="info-chip">${age}岁</span>
+    <span class="info-chip">${city}</span>
+  `;
+  document.getElementById('jobTitle').textContent = job;
+  document.getElementById('companyName').textContent = company;
+  document.getElementById('salaryBadge').textContent = salary;
+
+  // Education
+  document.querySelector('.info-section .info-section-title').insertAdjacentHTML = 'beforebegin';
+  document.getElementById('butterflyList').innerHTML = butterflies.map(b =>
+    `<li>${b}</li>`
+  ).join('');
+
+  document.getElementById('forkHighlight').textContent = `🪐 关键分叉：${forkQuestion}`;
+  document.getElementById('confidencePercent').textContent = `${confidence}%`;
+
+  // Animate confidence bar
+  setTimeout(() => {
+    document.getElementById('confidenceFill').style.width = `${confidence}%`;
+  }, 300);
+
+  // Show result
+  goToScreen('screen-result');
+  document.getElementById('landingDisclaimer').style.display = 'none';
+}
+
+// ═══════════════ SCREENSHOT ═══════════════
+async function takeScreenshot() {
+  if (typeof html2canvas === 'undefined') {
+    showToast('截图库加载中，请稍后再试');
+    return;
+  }
+  const card = document.getElementById('resultCard');
+  try {
+    const canvasImg = await html2canvas(card, {
+      backgroundColor: '#0a0e22',
+      scale: 2,
+      useCORS: true,
+      logging: false,
+    });
+    // Create a shareable image (trigger download + show overlay)
+    const link = document.createElement('a');
+    link.download = '平行宇宙简历.png';
+    link.href = canvasImg.toDataURL('image/png');
+    link.click();
+    document.getElementById('shareOverlay').classList.add('active');
+  } catch (e) {
+    showToast('截图失败，请长按手动截图');
+  }
+}
+
+function closeShare() {
+  document.getElementById('shareOverlay').classList.remove('active');
+}
+
+// ═══════════════ RESET ═══════════════
+function resetAll() {
+  selectedForkId = null;
+  document.querySelectorAll('.fork-option').forEach(o => o.classList.remove('selected'));
+  document.getElementById('btnContinue').disabled = true;
+  document.getElementById('inputName').value = '';
+  document.getElementById('inputAge').value = 28;
+  document.getElementById('ageDisplay').textContent = '28';
+  document.getElementById('confidenceFill').style.width = '0%';
+  document.getElementById('landingDisclaimer').style.display = 'block';
+  goToScreen('screen-landing');
+}
+
+// ═══════════════ TOAST ═══════════════
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(t._timeout);
+  t._timeout = setTimeout(() => t.classList.remove('show'), 2200);
+}
+
+// ═══════════════ INIT ═══════════════
+document.getElementById('landingDisclaimer').style.display = 'block';
+</script>
+</body>
+</html>
