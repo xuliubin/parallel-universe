@@ -56,13 +56,14 @@
     z-index: 1;
     max-width: 440px;
     margin: 0 auto;
-    padding: 20px 16px 40px;
+    padding: 20px 16px 120px;
     min-height: 100vh;
     min-height: 100dvh;
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: center;
+    justify-content: flex-start;
+    overflow-y: auto;
   }
 
   /* ── Screen Management ── */
@@ -178,6 +179,9 @@
   #screen-landing {
     text-align: center;
     gap: 8px;
+    min-height: 85vh;
+    min-height: 85dvh;
+    justify-content: center;
   }
   .landing-icon {
     width: 80px;
@@ -232,6 +236,8 @@
     gap: 16px;
     justify-content: flex-start;
     padding-top: 10px;
+    padding-bottom: 40px;
+    min-height: auto;
   }
   .section-label {
     font-size: 13px;
@@ -254,18 +260,18 @@
   }
   .tab-bar::-webkit-scrollbar { display: none; }
   .tab-btn {
-    flex: 1 0 auto;
-    padding: 10px 16px;
+    flex: 0 0 auto;
+    padding: 8px 12px;
     border: none;
     border-radius: 50px;
     background: transparent;
     color: var(--text-secondary);
-    font-size: 13px;
+    font-size: 12px;
     cursor: pointer;
     font-family: inherit;
     white-space: nowrap;
     transition: all 0.3s ease;
-    letter-spacing: 0.5px;
+    letter-spacing: 0.3px;
   }
   .tab-btn.active {
     background: rgba(120,140,220,0.25);
@@ -427,52 +433,102 @@
 
   /* ── SCREEN 4: Loading ── */
   #screen-loading {
-    gap: 32px;
-  }
-  .loading-ring {
-    width: 100px;
-    height: 100px;
-    border-radius: 50%;
-    border: 2px solid transparent;
-    border-top-color: var(--accent-lavender);
-    border-right-color: var(--accent-cyan);
-    animation: spinSlow 2s linear infinite;
+    gap: 0;
+    min-height: 85vh;
+    min-height: 85dvh;
+    justify-content: center;
     position: relative;
   }
-  .loading-ring::before {
-    content: '';
-    position: absolute;
-    inset: 12px;
-    border-radius: 50%;
-    border: 2px solid transparent;
-    border-bottom-color: var(--accent-gold);
-    border-left-color: var(--accent-rose);
-    animation: spinSlow 1.2s linear reverse infinite;
-  }
-  .loading-ring::after {
-    content: '🔮';
+  #wormholeCanvas {
     position: absolute;
     inset: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 32px;
-    animation: spinSlow 4s linear infinite;
+    width: 100%;
+    height: 100%;
+    z-index: 0;
+    pointer-events: none;
   }
-  .loading-text {
-    font-size: 15px;
-    color: var(--text-secondary);
-    letter-spacing: 1px;
-    text-align: center;
-    transition: all 0.4s ease;
-    min-height: 44px;
+  .terminal-window {
+    position: relative;
+    z-index: 1;
+    width: 90%;
+    max-width: 360px;
+    background: rgba(0,0,0,0.85);
+    border: 1px solid rgba(0,255,100,0.3);
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 0 30px rgba(0,255,100,0.08);
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.6s ease, transform 0.6s ease;
+  }
+  .terminal-window.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  .terminal-header {
     display: flex;
     align-items: center;
+    gap: 6px;
+    padding: 8px 12px;
+    background: rgba(255,255,255,0.05);
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+  }
+  .terminal-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+  }
+  .terminal-title {
+    margin-left: 8px;
+    font-size: 11px;
+    color: rgba(255,255,255,0.4);
+    font-family: "SF Mono", "Consolas", "Courier New", monospace;
+  }
+  .terminal-body {
+    padding: 16px 14px;
+    font-family: "SF Mono", "Consolas", "Courier New", monospace;
+    font-size: 13px;
+    line-height: 1.8;
+    color: #0f0;
+    min-height: 120px;
+  }
+  .terminal-line {
+    white-space: pre-wrap;
+    word-break: break-all;
+  }
+  .terminal-line .prompt { color: #0f0; }
+  .terminal-line .output { color: #aaa; }
+  .terminal-cursor {
+    display: inline-block;
+    width: 8px;
+    height: 15px;
+    background: #0f0;
+    animation: blink 0.6s step-end infinite;
+    vertical-align: middle;
+    margin-left: 2px;
+  }
+  @keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0; }
+  }
+  /* White flash */
+  .white-flash {
+    position: fixed;
+    inset: 0;
+    background: white;
+    z-index: 999;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.4s ease-out;
+  }
+  .white-flash.fire {
+    opacity: 0.85;
   }
 
   /* ── SCREEN 5: Result Card ── */
   #screen-result {
     gap: 16px;
+    padding-bottom: 40px;
   }
   .result-card {
     background: linear-gradient(170deg,
@@ -734,13 +790,13 @@
 
   /* ── Responsive ── */
   @media (min-width: 440px) {
-    .app-container { padding: 40px 24px 60px; }
+    .app-container { padding: 40px 24px 120px; }
     .landing-title { font-size: 32px; }
   }
   @media (max-width: 340px) {
     .landing-title { font-size: 24px; }
     .job-title-line { font-size: 16px; }
-    .tab-btn { font-size: 11px; padding: 8px 12px; }
+    .tab-btn { font-size: 10px; padding: 6px 10px; }
   }
 
   /* ── Toast ── */
@@ -798,7 +854,7 @@
       <button class="tab-btn" data-tab="love">💕 感情</button>
       <button class="tab-btn" data-tab="city">🌆 城市</button>
       <button class="tab-btn" data-tab="edu">📚 教育</button>
-      <button class="tab-btn" data-tab="drama">⚡ 戏剧性</button>
+      <button class="tab-btn" data-tab="drama">⚡ 戏剧</button>
     </div>
 
     <div id="forkContainer"></div>
@@ -846,8 +902,16 @@
 
   <!-- ═══════════ SCREEN 4: LOADING ═══════════ -->
   <div id="screen-loading" class="screen">
-    <div class="loading-ring"></div>
-    <div class="loading-text" id="loadingText">正在搜索平行宇宙…</div>
+    <canvas id="wormholeCanvas"></canvas>
+    <div class="terminal-window" id="terminalWindow">
+      <div class="terminal-header">
+        <span class="terminal-dot" style="background:#ff5f57"></span>
+        <span class="terminal-dot" style="background:#febc2e"></span>
+        <span class="terminal-dot" style="background:#28c840"></span>
+        <span class="terminal-title">parallel-universe://query</span>
+      </div>
+      <div class="terminal-body" id="terminalBody"></div>
+    </div>
   </div>
 
   <!-- ═══════════ SCREEN 5: RESULT ═══════════ -->
@@ -900,7 +964,7 @@
     <h3>📸 截图已生成</h3>
     <p>长按保存图片 → 发小红书笔记</p>
     <p style="font-size:12px;color:var(--text-muted)">关注博主，解锁更多人生问题</p>
-    <div class="share-xhs-id">小红书号：待填</div>
+    <div class="share-xhs-id">小红书：@斌gld | ID: 1466731511</div>
     <button class="share-close" onclick="closeShare()">关闭</button>
   </div>
 </div>
@@ -1026,27 +1090,47 @@ const forkData = {
   ],
 };
 
-let selectedForkId = null;
+let selectedForkIds = [];
+const MAX_FORKS = 3;
 
 function renderForkList(category) {
   const container = document.getElementById('forkContainer');
   const items = forkData[category] || [];
-  container.innerHTML = items.map(item => `
-    <div class="fork-option" data-fork-id="${item.id}" onclick="selectFork('${item.id}', this)">
+  container.innerHTML = items.map(item => {
+    const isSelected = selectedForkIds.includes(item.id);
+    return `
+    <div class="fork-option${isSelected ? ' selected' : ''}" data-fork-id="${item.id}" onclick="selectFork('${item.id}', this)">
       <div class="fork-question">${item.q}</div>
       <div class="fork-hint">${item.hint}</div>
     </div>
-  `).join('');
+  `}).join('');
   container.className = 'fork-list active';
-  selectedForkId = null;
-  document.getElementById('btnContinue').disabled = true;
+  updateContinueButton();
 }
 
 function selectFork(forkId, el) {
-  document.querySelectorAll('.fork-option').forEach(o => o.classList.remove('selected'));
-  el.classList.add('selected');
-  selectedForkId = forkId;
-  document.getElementById('btnContinue').disabled = false;
+  if (el.classList.contains('selected')) {
+    el.classList.remove('selected');
+    selectedForkIds = selectedForkIds.filter(id => id !== forkId);
+  } else {
+    if (selectedForkIds.length >= MAX_FORKS) {
+      showToast(`最多选择 ${MAX_FORKS} 个分叉点`);
+      return;
+    }
+    el.classList.add('selected');
+    selectedForkIds.push(forkId);
+  }
+  updateContinueButton();
+}
+
+function updateContinueButton() {
+  const btn = document.getElementById('btnContinue');
+  btn.disabled = selectedForkIds.length === 0;
+  if (selectedForkIds.length > 0) {
+    btn.textContent = `继续（已选 ${selectedForkIds.length}/${MAX_FORKS}）→`;
+  } else {
+    btn.textContent = '继续 →';
+  }
 }
 
 // Tab switching
@@ -1083,9 +1167,9 @@ function startSimulation() {
     showToast('请输入你的名字或昵称');
     return;
   }
-  if (!selectedForkId) {
+  if (selectedForkIds.length === 0) {
     goToScreen('screen-select');
-    showToast('请先选择一个分叉点');
+    showToast('请至少选择一个分叉点');
     return;
   }
   goToScreen('screen-loading');
@@ -1093,30 +1177,213 @@ function startSimulation() {
 }
 
 // ═══════════════ SCREEN 4: LOADING ═══════════════
-function runLoadingSequence(name, age, gender) {
-  const loadingText = document.getElementById('loadingText');
-  const archiveNum = Math.floor(10000 + Math.random() * 90000);
-  const foundCount = Math.floor(Math.random() * 7) + 3;
-  const sequences = [
-    { text: `正在搜索平行宇宙 #${archiveNum}...`, delay: 0 },
-    { text: `已找到 ${foundCount} 条可能的人生线`, delay: 900 },
-    { text: '正在匹配最可能的那一条...', delay: 1700 },
-    { text: '同步蝴蝶效应数据...', delay: 2200 },
-  ];
+// ═══ Wormhole canvas ═══
+const wormCanvas = document.getElementById('wormholeCanvas');
+const wormCtx = wormCanvas.getContext('2d');
+let wormParticles = [];
+let wormActive = false;
+let wormIntensity = 0;
 
-  sequences.forEach(seq => {
-    setTimeout(() => {
-      loadingText.style.opacity = '0';
-      setTimeout(() => {
-        loadingText.textContent = seq.text;
-        loadingText.style.opacity = '1';
-      }, 200);
-    }, seq.delay);
+function resizeWormCanvas() {
+  wormCanvas.width = window.innerWidth;
+  wormCanvas.height = window.innerHeight;
+}
+resizeWormCanvas();
+window.addEventListener('resize', resizeWormCanvas);
+
+function initWormParticles() {
+  const count = 300;
+  wormParticles = [];
+  const cx = wormCanvas.width / 2;
+  const cy = wormCanvas.height / 2;
+  for (let i = 0; i < count; i++) {
+    const angle = Math.random() * Math.PI * 2;
+    const dist = 50 + Math.random() * Math.max(wormCanvas.width, wormCanvas.height);
+    wormParticles.push({
+      x: cx + Math.cos(angle) * dist,
+      y: cy + Math.sin(angle) * dist,
+      ox: cx + Math.cos(angle) * dist,
+      oy: cy + Math.sin(angle) * dist,
+      angle: angle,
+      dist: dist,
+      speed: 1.5 + Math.random() * 4,
+      hue: 200 + Math.random() * 80,
+      size: 0.8 + Math.random() * 2.5,
+    });
+  }
+}
+
+function drawWormhole() {
+  if (!wormActive && wormIntensity <= 0) { wormCtx.clearRect(0, 0, wormCanvas.width, wormCanvas.height); return; }
+
+  wormCtx.clearRect(0, 0, wormCanvas.width, wormCanvas.height);
+  const cx = wormCanvas.width / 2;
+  const cy = wormCanvas.height / 2;
+
+  // Fade out when inactive
+  if (!wormActive && wormIntensity > 0) {
+    wormIntensity = Math.max(0, wormIntensity - 0.03);
+    if (wormIntensity <= 0) {
+      wormCtx.clearRect(0, 0, wormCanvas.width, wormCanvas.height);
+      return;
+    }
+  }
+  if (wormActive && wormIntensity < 1) {
+    wormIntensity = Math.min(1, wormIntensity + 0.04);
+  }
+
+  wormParticles.forEach(p => {
+    // Move toward center
+    const dx = cx - p.x;
+    const dy = cy - p.y;
+    const dist = Math.sqrt(dx * dx + dy * dy);
+    if (dist < 3) {
+      // Reset to outer ring
+      p.dist = 300 + Math.random() * 200;
+      p.x = cx + Math.cos(p.angle) * p.dist;
+      p.y = cy + Math.sin(p.angle) * p.dist;
+    } else {
+      const moveSpeed = p.speed * wormIntensity * (1 + 0.5 / (dist / 100 + 0.1));
+      p.x += (dx / dist) * moveSpeed;
+      p.y += (dy / dist) * moveSpeed;
+    }
+
+    // Draw with trail toward center
+    const alpha = 0.3 + 0.7 * wormIntensity;
+    wormCtx.beginPath();
+    wormCtx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+    wormCtx.fillStyle = `hsla(${p.hue},70%,80%,${alpha})`;
+    wormCtx.fill();
+
+    // Streak trail
+    if (wormIntensity > 0.4) {
+      const trailLen = p.speed * 3 * wormIntensity;
+      wormCtx.beginPath();
+      wormCtx.moveTo(p.x, p.y);
+      const tdx = (cx - p.x) / (Math.sqrt((cx-p.x)**2 + (cy-p.y)**2) + 0.01);
+      const tdy = (cy - p.y) / (Math.sqrt((cx-p.x)**2 + (cy-p.y)**2) + 0.01);
+      wormCtx.lineTo(p.x - tdx * trailLen, p.y - tdy * trailLen);
+      wormCtx.strokeStyle = `hsla(${p.hue},80%,90%,${alpha * 0.5})`;
+      wormCtx.lineWidth = p.size * 0.6;
+      wormCtx.stroke();
+    }
   });
 
+  // Center glow
+  if (wormIntensity > 0.3) {
+    const glow = wormCtx.createRadialGradient(cx, cy, 0, cx, cy, 60 * wormIntensity);
+    glow.addColorStop(0, `rgba(200,220,255,${0.6 * wormIntensity})`);
+    glow.addColorStop(0.5, `rgba(140,180,255,${0.2 * wormIntensity})`);
+    glow.addColorStop(1, 'rgba(0,0,0,0)');
+    wormCtx.fillStyle = glow;
+    wormCtx.fillRect(cx - 60, cy - 60, 120, 120);
+  }
+
+  if (wormActive || wormIntensity > 0) {
+    requestAnimationFrame(drawWormhole);
+  }
+}
+
+// ═══ Terminal typewriter ═══
+function typeLine(el, text, speed, callback) {
+  let i = 0;
+  el.innerHTML = '';
+  const cursor = document.createElement('span');
+  cursor.className = 'terminal-cursor';
+  el.appendChild(cursor);
+  function tick() {
+    if (i < text.length) {
+      cursor.before(document.createTextNode(text[i]));
+      i++;
+      setTimeout(tick, speed);
+    } else {
+      cursor.remove();
+      if (callback) callback();
+    }
+  }
+  tick();
+}
+
+function addTerminalLine(text, className, withPrompt) {
+  const body = document.getElementById('terminalBody');
+  const line = document.createElement('div');
+  line.className = 'terminal-line ' + (className || '');
+  if (withPrompt) {
+    const prompt = document.createElement('span');
+    prompt.className = 'prompt';
+    prompt.textContent = '> ';
+    line.appendChild(prompt);
+  }
+  body.appendChild(line);
+  return line;
+}
+
+// ═══ Loading orchestration ═══
+function runLoadingSequence(name, age, gender) {
+  const archiveNum = Math.floor(10000 + Math.random() * 90000);
+  const forkCount = selectedForkIds.length;
+  const foundCount = Math.floor(Math.random() * 7) + 8;
+  const terminalBody = document.getElementById('terminalBody');
+  const terminalWindow = document.getElementById('terminalWindow');
+
+  // Reset terminal
+  terminalBody.innerHTML = '';
+  terminalWindow.classList.remove('visible');
+
+  // Phase 1: Wormhole (0 - 2.5s)
+  wormActive = true;
+  initWormParticles();
+  drawWormhole();
+
+  // Terminal appears at 1.8s, while wormhole is still going
   setTimeout(() => {
-    generateResult(name, age, gender, Math.floor(10000 + Math.random() * 90000));
-  }, 3000);
+    terminalWindow.classList.add('visible');
+  }, 1800);
+
+  // Phase 2: Terminal typewriter (2.0s - 5.5s), wormhole slowly fades
+  setTimeout(() => {
+    wormActive = false; // Start fading wormhole gradually
+
+    const lines = [
+      { text: `链接平行宇宙节点 #${archiveNum}...`, prompt: true, delay: 0 },
+      { text: `扫描时间线分支...`, prompt: true, delay: 500 },
+      { text: `发现 ${foundCount} 条可行人生轨迹`, prompt: false, delay: 1000 },
+      { text: forkCount > 1
+        ? `正在交叉比对 ${forkCount} 个分叉节点的蝴蝶效应...`
+        : `正在匹配最优人生轨迹...`, prompt: true, delay: 1600 },
+      { text: `蝴蝶效应链分析：完成 ✓`, prompt: false, delay: 2400 },
+      { text: `正在生成平行宇宙简历档案...`, prompt: true, delay: 3100 },
+    ];
+
+    lines.forEach(l => {
+      setTimeout(() => {
+        const lineEl = addTerminalLine('', 'output', l.prompt);
+        typeLine(lineEl, l.text, 40 + Math.random() * 30, () => {
+          // Last line triggers result
+          if (l.text.includes('简历档案')) {
+            setTimeout(() => {
+              let flash = document.querySelector('.white-flash');
+              if (!flash) {
+                flash = document.createElement('div');
+                flash.className = 'white-flash';
+                document.body.appendChild(flash);
+              }
+              flash.classList.add('fire');
+              setTimeout(() => {
+                flash.classList.remove('fire');
+                // Clean up
+                wormIntensity = 0;
+                wormActive = false;
+                wormCtx.clearRect(0, 0, wormCanvas.width, wormCanvas.height);
+                // Show result
+                generateResult(name, age, gender, archiveNum);
+              }, 350);
+            }, 500);
+          }
+        });
+      }, l.delay);
+    });
+  }, 2000);
 }
 
 // ═══════════════ RESULT GENERATION ENGINE ═══════════════
@@ -1399,50 +1666,42 @@ function labelFor(gender, type) {
   return map[gender]?.[type] || type;
 }
 
-function generateResult(name, age, gender, archiveNum) {
-  const forkId = selectedForkId;
+// ═══════════════ RESULT ENGINE ═══════════════
+// Resolve a single fork → {job, company, salary, edu, butterflies, city}
+function resolveFork(forkId, age) {
   const pool = outcomePools[forkId];
-
-  // Build a result object
   let job, company, salary, edu, butterflies = [];
   let city = pick(cities);
-  let confidence = Math.floor(Math.random() * 25) + 12; // 12-36%
 
-  // Map fork to actual data
   if (forkId === 'c1') {
     const path = Math.random() > 0.5 ? 'bigCity' : 'hometown';
     const j = pick(pool[path].jobs);
     job = j.title; company = j.company; salary = j.salary; edu = j.edu;
     butterflies = [...pickN(pool[path].butterfly_good, 2), pick(pool[path].butterfly_bad)];
     city = path === 'bigCity' ? pick(['深圳','上海','杭州','北京']) : pick(['长沙','南昌','洛阳','绵阳']);
-    confidence = path === 'bigCity' ? Math.floor(Math.random() * 20) + 18 : Math.floor(Math.random() * 20) + 30;
   } else if (forkId === 'c2') {
     const path = Math.random() > 0.5 ? 'gong' : 'siqi';
     const j = pick(pool[path].jobs);
     job = j.title; company = j.company; salary = j.salary; edu = j.edu;
     butterflies = [...pickN(pool[path].butterfly_good, 2), pick(pool[path].butterfly_bad)];
     city = path === 'gong' ? pick(['北京','南京','武汉','西安']) : pick(['深圳','杭州','上海','成都']);
-    confidence = Math.floor(Math.random() * 22) + 15;
   } else if (forkId === 'c3') {
     const path = Math.random() > 0.65 ? 'success' : 'fail';
     const j = pick(pool[path].jobs);
     job = j.title; company = j.company; salary = j.salary; edu = j.edu;
     butterflies = [...pickN(pool[path].butterfly_good, 2), pick(pool[path].butterfly_bad)];
     city = pick(['大理','成都','厦门','杭州']);
-    confidence = path === 'success' ? Math.floor(Math.random() * 18) + 10 : Math.floor(Math.random() * 15) + 25;
   } else if (forkId === 'c4') {
     const j = pick(pool.passion.jobs);
     job = j.title; company = j.company; salary = j.salary; edu = j.edu;
     butterflies = [...pickN(pool.passion.butterfly_good, 2)];
     city = pick(['杭州','大理','成都','厦门','苏州']);
-    confidence = Math.floor(Math.random() * 15) + 8;
   } else if (forkId === 'c5') {
     const path = Math.random() > 0.5 ? 'stay' : 'go';
     const j = pick(pool[path].jobs);
     job = j.title; company = j.company; salary = j.salary; edu = j.edu;
     butterflies = [...pickN(pool[path].butterfly_good, 2), pick(pool[path].butterfly_bad)];
     if (path === 'go') { city = pick(['新加坡','纽约','伦敦','香港']); butterflies.push('拿到了海外永居'); }
-    confidence = Math.floor(Math.random() * 20) + 15;
   } else if (forkId === 'l1') {
     const j = pick(pool.together.jobs);
     job = j.title; company = j.company; salary = j.salary; edu = j.edu;
@@ -1450,94 +1709,79 @@ function generateResult(name, age, gender, archiveNum) {
     if (Math.random() > 0.5) butterflies.push(pick(pool.together.butterfly_bad));
     butterflies.push('你们的关系成了朋友圈里被羡慕的那种');
     city = pick(cities);
-    confidence = Math.floor(Math.random() * 25) + 15;
   } else if (forkId === 'l2') {
     const j = pick(pool.accept.jobs);
     job = j.title; company = j.company; salary = j.salary; edu = j.edu;
     butterflies = [pick(pool.accept.butterfly_good)];
     if (Math.random() > 0.6) butterflies.push(pick(pool.accept.butterfly_bad));
     city = pick(cities);
-    confidence = Math.floor(Math.random() * 20) + 10;
   } else if (forkId === 'l3') {
     const j = pick(pool.solo.jobs);
     job = j.title; company = j.company; salary = j.salary; edu = j.edu;
     butterflies = [...pickN(pool.solo.butterfly_good, 2)];
     if (Math.random() > 0.5) butterflies.push(pick(pool.solo.butterfly_bad));
     city = pick(['上海','深圳','北京','成都']);
-    confidence = Math.floor(Math.random() * 20) + 20;
   } else if (forkId === 'l4') {
     const path = age > 25 ? 'late' : 'early';
     const j = pick(pool[path].jobs);
     job = j.title; company = j.company; salary = j.salary; edu = j.edu;
     butterflies = [...pickN(pool[path].butterfly_good, 2), pick(pool[path].butterfly_bad)];
     city = pick(cities);
-    confidence = Math.floor(Math.random() * 22) + 16;
   } else if (forkId === 'l5') {
     const j = pick(pool.suitable.jobs);
     job = j.title; company = j.company; salary = j.salary; edu = j.edu;
     butterflies = [pick(pool.suitable.butterfly_good), pick(pool.suitable.butterfly_bad)];
     city = pick(cities);
-    confidence = Math.floor(Math.random() * 20) + 18;
   } else if (forkId === 't1') {
     const j = pick(pool.moved.jobs);
     job = j.title; company = j.company; salary = j.salary; edu = j.edu;
     butterflies = [...pickN(pool.moved.butterfly_good, 2), pick(pool.moved.butterfly_bad)];
     city = pick(['大理','成都','厦门','北海','丽江']);
-    confidence = Math.floor(Math.random() * 15) + 10;
   } else if (forkId === 't2') {
     const j = pick(pool.abroad.jobs);
     job = j.title; company = j.company; salary = j.salary; edu = j.edu;
     butterflies = [...pickN(pool.abroad.butterfly_good, 2), pick(pool.abroad.butterfly_bad)];
     city = pick(['旧金山','伦敦','新加坡','东京','悉尼']);
-    confidence = Math.floor(Math.random() * 18) + 12;
   } else if (forkId === 't3') {
     const path = Math.random() > 0.5 ? 'rent' : 'mortgage';
     const j = pick(pool[path].jobs);
     job = j.title; company = j.company; salary = j.salary; edu = j.edu;
     butterflies = [...pickN(pool[path].butterfly_good, 2), pick(pool[path].butterfly_bad)];
     city = pick(cities);
-    confidence = path === 'rent' ? Math.floor(Math.random() * 18) + 10 : Math.floor(Math.random() * 15) + 22;
   } else if (forkId === 'e1') {
     const j = pick(pool.coldMajor.jobs);
     job = j.title; company = j.company; salary = j.salary; edu = j.edu;
     butterflies = [...pickN(pool.coldMajor.butterfly_good, 2), pick(pool.coldMajor.butterfly_bad)];
     city = pick(['北京','南京','西安','兰州','沈阳']);
-    confidence = Math.floor(Math.random() * 15) + 8;
   } else if (forkId === 'e2') {
     const j = pick(pool.dropout.jobs);
     job = j.title; company = j.company; salary = j.salary; edu = j.edu;
     butterflies = [...pickN(pool.dropout.butterfly_good, 1), pick(pool.dropout.butterfly_bad)];
     city = pick(['深圳','杭州','北京','上海']);
-    confidence = Math.floor(Math.random() * 15) + 5;
   } else if (forkId === 'e3') {
     const j = pick(pool.backToSchool.jobs);
     job = j.title; company = j.company; salary = j.salary; edu = j.edu;
     butterflies = [...pickN(pool.backToSchool.butterfly_good, 1), pick(pool.backToSchool.butterfly_bad)];
     city = pick(cities);
-    confidence = Math.floor(Math.random() * 18) + 14;
   } else if (forkId === 'd1') {
     const path = Math.random() > 0.8 ? 'win' : 'miss';
     const j = pick(pool[path].jobs);
     job = j.title; company = j.company; salary = j.salary; edu = j.edu;
     butterflies = [...pickN(pool[path].butterfly_good, 2), pick(pool[path].butterfly_bad)];
     city = pick(cities);
-    confidence = path === 'win' ? Math.floor(Math.random() * 5) + 2 : Math.floor(Math.random() * 20) + 25;
   } else if (forkId === 'd2') {
     const j = pick(pool.said.jobs);
     job = j.title; company = j.company; salary = j.salary; edu = j.edu;
     butterflies = [pick(pool.said.butterfly_good)];
     if (Math.random() > 0.55) butterflies.push(pick(pool.said.butterfly_bad));
     city = pick(cities);
-    confidence = Math.floor(Math.random() * 20) + 18;
     butterflies.push('——那句话说出口之后，你就已经不再是原来的你');
   } else if (forkId === 'd3') {
     const j = pick(pool.anotherFamily.jobs);
     job = j.title; company = j.company; salary = j.salary; edu = j.edu;
     butterflies = [pick(pool.anotherFamily.butterfly_good), pick(pool.anotherFamily.butterfly_bad)];
     city = pick(['北京','上海','香港','纽约','在一个完全不同的地方']);
-    confidence = Math.floor(Math.random() * 10) + 3;
   } else {
-    // Generic fallback
     const genericJobs = [
       { title:'自由职业者', company:'自雇', salary:'年收入 20-50 万', edu:'某大学 · 本科' },
       { title:'创业者', company:'自己的公司', salary:'年收入 30-100 万', edu:'某大学 · 本科' },
@@ -1551,19 +1795,60 @@ function generateResult(name, age, gender, archiveNum) {
       '认识了全新的人，进入了全新的圈子',
       '偶尔会想，如果在原来的时间线会怎样',
     ];
-    confidence = Math.floor(Math.random() * 25) + 12;
   }
 
-  // Add gender-specific butterflies
-  if (gender === 'female') {
-    butterflies = butterflies.map(b => b.replace('他/', '她/'));
-  }
-
-  // Get the fork question for highlight
+  // Get fork question text
   let forkQuestion = '';
   for (const cat of Object.values(forkData)) {
     const found = cat.find(f => f.id === forkId);
     if (found) { forkQuestion = found.q; break; }
+  }
+
+  return { job, company, salary, edu, butterflies, city, forkQuestion };
+}
+
+function generateResult(name, age, gender, archiveNum) {
+  const forkIds = selectedForkIds;
+  const forkCount = forkIds.length;
+
+  // Resolve each selected fork independently
+  const results = forkIds.map(fid => resolveFork(fid, age));
+
+  // Pick the primary result: first fork with a real job title (not '—')
+  const primary = results.find(r => r.job !== '—') || results[0];
+
+  let job = primary.job, company = primary.company, salary = primary.salary, edu = primary.edu;
+  let city = primary.city;
+
+  // Merge all butterflies (deduplicate)
+  const seen = new Set();
+  let allButterflies = [];
+  results.forEach(r => {
+    r.butterflies.forEach(b => {
+      // Normalize for dedup: truncate to first 20 chars for comparison
+      const key = b.slice(0, 20);
+      if (!seen.has(key)) {
+        seen.add(key);
+        allButterflies.push(b);
+      }
+    });
+  });
+  // Limit to 6 max for card readability
+  if (allButterflies.length > 6) allButterflies = pickN(allButterflies, 6);
+
+  // Merge fork questions
+  const forkQuestions = results.map(r => r.forkQuestion).filter(Boolean);
+  const forkHighlight = forkCount === 1
+    ? `🪐 关键分叉：${forkQuestions[0]}`
+    : `🪐 ${forkCount} 个关键分叉：${forkQuestions.join(' · ')}`;
+
+  // Confidence: base 28%, minus 6% per additional fork (more forks = more chaos = less certainty)
+  let confidence = Math.floor(Math.random() * 18) + 20 - (forkCount - 1) * 6;
+  if (confidence < 3) confidence = Math.floor(Math.random() * 5) + 3;
+
+  // Add gender-specific butterflies
+  if (gender === 'female') {
+    allButterflies = allButterflies.map(b => b.replace('他/', '她/'));
   }
 
   // Update DOM
@@ -1579,13 +1864,11 @@ function generateResult(name, age, gender, archiveNum) {
   document.getElementById('companyName').textContent = company;
   document.getElementById('salaryBadge').textContent = salary;
 
-  // Education
-  document.querySelector('.info-section .info-section-title').insertAdjacentHTML = 'beforebegin';
-  document.getElementById('butterflyList').innerHTML = butterflies.map(b =>
+  document.getElementById('butterflyList').innerHTML = allButterflies.map(b =>
     `<li>${b}</li>`
   ).join('');
 
-  document.getElementById('forkHighlight').textContent = `🪐 关键分叉：${forkQuestion}`;
+  document.getElementById('forkHighlight').textContent = forkHighlight;
   document.getElementById('confidencePercent').textContent = `${confidence}%`;
 
   // Animate confidence bar
@@ -1629,9 +1912,10 @@ function closeShare() {
 
 // ═══════════════ RESET ═══════════════
 function resetAll() {
-  selectedForkId = null;
+  selectedForkIds = [];
   document.querySelectorAll('.fork-option').forEach(o => o.classList.remove('selected'));
   document.getElementById('btnContinue').disabled = true;
+  document.getElementById('btnContinue').textContent = '继续 →';
   document.getElementById('inputName').value = '';
   document.getElementById('inputAge').value = 28;
   document.getElementById('ageDisplay').textContent = '28';
